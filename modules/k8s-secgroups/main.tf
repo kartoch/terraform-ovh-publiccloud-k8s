@@ -10,22 +10,6 @@ resource "openstack_networking_secgroup_v2" "worker" {
   description = "${var.name} worker nodes security group"
 }
 
-resource "openstack_networking_secgroup_rule_v2" "egress-ipv4_worker" {
-  count             = "${var.apply_module && var.worker_egress_ip_prefix != "" ? 1 : 0}"
-  direction         = "egress"
-  ethertype         = "IPv4"
-  security_group_id = "${openstack_networking_secgroup_v2.worker.id}"
-  remote_ip_prefix  = "${var.worker_egress_ip_prefix}"
-}
-
-resource "openstack_networking_secgroup_rule_v2" "egress-ipv4_master" {
-  count             = "${var.apply_module && var.master_egress_ip_prefix != "" ? 1 : 0}"
-  direction         = "egress"
-  ethertype         = "IPv4"
-  security_group_id = "${openstack_networking_secgroup_v2.master.id}"
-  remote_ip_prefix  = "${var.master_egress_ip_prefix}"
-}
-
 resource "openstack_networking_secgroup_rule_v2" "etcd_peer_master_master" {
   count             = "${var.apply_module && var.etcd ? 1 : 0}"
   direction         = "ingress"
