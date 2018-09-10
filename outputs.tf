@@ -12,7 +12,7 @@ output "cfssl_endpoint" {
 
 output "etcd_initial_cluster" {
   description = "The etcd initial cluster that can be used to join the cluster"
-  value = "${module.userdata.etcd_initial_cluster}"
+  value       = "${module.userdata.etcd_initial_cluster}"
 }
 
 output "etcd_endpoints" {
@@ -34,4 +34,9 @@ output "master_group_id" {
 output "worker_group_id" {
   description = "The security group id for worker nodes if `create_secgroups` is set to true"
   value       = "${module.secgroups.worker_group_id}"
+}
+
+output "ids" {
+  description = "The ids of the instances"
+  value       = ["${concat(openstack_compute_instance_v2.singlenet_k8s.*.id, openstack_compute_instance_v2.multinet_k8s.*.id)}"]
 }
