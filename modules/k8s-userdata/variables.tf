@@ -30,8 +30,8 @@ variable "k8s_version" {
 
 variable "ipv4_addrs" {
   description = "list of nodes ipv4 addrs. Required if `master_mode` is true."
-  type = "list"
-  default = []
+  type        = "list"
+  default     = []
 }
 
 variable "etcd" {
@@ -41,17 +41,17 @@ and no `etcd_initial_cluster` is given as argument, etcd will
 bootstrap a new cluster.
 DESC
 
-  default     = false
+  default = false
 }
 
 variable "etcd_initial_cluster" {
   description = "etcd initial cluster. Useful to join an existing cluster. Useful if `master_mode` is true."
-  default = ""
+  default     = ""
 }
 
 variable "etcd_endpoints" {
   description = "etcd endpoints to call to query the etcd cluster"
-  default = ""
+  default     = ""
 }
 
 variable "master_mode" {
@@ -73,6 +73,12 @@ variable "ssh_authorized_keys" {
 variable "host_cidr" {
   description = "CIDR IPv4 range to assign to openstack instances"
   type        = "string"
+}
+
+variable "volume_plugin_dir" {
+  description = ""
+  type        = "string"
+  value       = "/var/lib/kubelet/volumeplugins"
 }
 
 variable "pod_cidr" {
