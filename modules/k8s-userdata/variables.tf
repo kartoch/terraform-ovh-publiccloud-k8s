@@ -76,9 +76,9 @@ variable "host_cidr" {
 }
 
 variable "volume_plugin_dir" {
-  description = ""
+  description = "Value for the kubelet volumeplugins dir"
   type        = "string"
-  value       = "/var/lib/kubelet/volumeplugins"
+  default     = "/var/lib/kubelet/volumeplugins"
 }
 
 variable "pod_cidr" {
