@@ -39,8 +39,13 @@ variable "image_name" {
   default     = "CoreOS Stable - OVH Kubernetes"
 }
 
-variable "image_version" {
+variable "image_tag" {
   description = "The version of the prebuilt glance image to run in the cluster."
+  default     = "latest"
+}
+
+variable "image_version" {
+  description = "DEPRECATED The version of the prebuilt glance image to run in the cluster."
   default     = "latest"
 }
 

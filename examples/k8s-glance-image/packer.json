@@ -8,7 +8,7 @@
         "module_etcd_version": "0.1.2",
         "module_etcd_sha256sum": "7f6d7a613162d4c9456854e76a098a4cc6dd13e2cf88cba69666e33126ac19a2",
         "ext_net_id": "",
-        "version": "latest",
+        "tag": "latest",
         "image_name": "",
         "commit": ""
     },
@@ -27,7 +27,7 @@
                 "{{user `ext_net_id`}}"
             ],
             "metadata": {
-                "version": "{{user `version`}}",
+                "tag": "{{user `tag`}}",
                 "commit": "{{user `commit`}}",
                 "community": "ovh"
             }
@@ -46,7 +46,7 @@
                 "{{user `ext_net_id`}}"
             ],
             "metadata": {
-                "version": "{{user `version`}}",
+                "tag": "{{user `tag`}}",
                 "commit": "{{user `commit`}}",
                 "community": "ovh"
             }

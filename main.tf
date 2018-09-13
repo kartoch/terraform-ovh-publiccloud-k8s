@@ -9,7 +9,7 @@ data "openstack_images_image_v2" "k8s" {
   most_recent = true
 
   properties {
-    version = "${var.image_version}"
+    tag = "${var.image_version != "latest" && var.image_version != "" ? var.image_version : var.image_tag}"
   }
 }
 
