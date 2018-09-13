@@ -37,11 +37,9 @@ if [ "$MASTER_MODE" == "1" ]; then
     if [ ! -d /etc/kubernetes/cni ]; then
         mkdir -p /etc/kubernetes/cni
     fi
-    /opt/k8s/cni-rbac.yaml.sh > /etc/kubernetes/cni/cni-rbac.yaml
     /opt/k8s/cni-manifest.yaml.sh > /etc/kubernetes/cni/cni-manifest.yaml
 
     # Apply CNI manifests if master
-    /opt/k8s/bin/kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f /etc/kubernetes/cni/cni-rbac.yaml
     /opt/k8s/bin/kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f /etc/kubernetes/cni/cni-manifest.yaml
 
 else

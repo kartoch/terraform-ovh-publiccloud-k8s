@@ -57,7 +57,7 @@ function already_published_image(){
 
 image_commit=$(git rev-parse --verify --short HEAD 2>/dev/null)
 tag=$((git describe --tags) 2>/dev/null)
-image_version=${tag:-latest}
+image_tag=${tag:-latest}
 image_name=""
 
 if [ "$TARGET" == "coreos" ]; then
@@ -71,7 +71,7 @@ fi
 
 # computing image file name
 image_file_name="$(echo "${image_name}_${image_commit}.raw" | tr ' ' '_' | tr '[:upper:]'  '[:lower:]')"
-image_version_file_name="$(echo "${image_name}.${image_version}.txt" | tr ' ' '_' | tr '[:upper:]'  '[:lower:]')"
+image_tag_file_name="$(echo "${image_name}.${image_tag}.txt" | tr ' ' '_' | tr '[:upper:]'  '[:lower:]')"
 
 # Retrieving most recent image id
 echo "getting id for image with name '$image_name' and commit '$image_commit' in region '$IMAGE_REGION'" >&2
@@ -127,8 +127,8 @@ gpg --batch --passphrase-file "$PGP_KEY_PASSPHRASE_FILE" -u "$PGP_SIGN_ID" --det
 echo "signing image checksum fil in '$tmp_dir'" >&2
 gpg --batch --passphrase-file "$PGP_KEY_PASSPHRASE_FILE" -u "$PGP_SIGN_ID" --detach-sig ${tmp_dir}/${image_file_name}.md5sum.txt
 
-# creating version file
-echo $image_commit > "${tmp_dir}/${image_version_file_name}"
+# creating tag file
+echo $image_commit > "${tmp_dir}/${image_tag_file_name}"
 
 # create swift container
 echo "creating swift container '$CONTAINER_NAME' in region '${CONTAINER_REGION}'" >&2

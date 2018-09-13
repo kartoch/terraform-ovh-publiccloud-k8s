@@ -18,7 +18,7 @@ fi
 echo "checking if image already built for commit $COMMIT and target $TARGET" >&2
 image_id=$(openstack image list \
                      --name "$image_name" \
-                     --property "version=$VERSION" \
+                     --property "tag=$VERSION" \
                      --property "commit=$COMMIT" \
                      --status active \
                      -f value \
@@ -33,7 +33,7 @@ $PACKERBIN build \
            -var image_name="$image_name" \
            -var region="$OS_REGION_NAME" \
            -var ext_net_id=$(openstack network show -c id -f value "Ext-Net") \
-           -var version="$VERSION" \
+           -var tag="$VERSION" \
            -var commit="$COMMIT" \
            -only "$TARGET" \
            packer.json

@@ -14,7 +14,7 @@ networking:
   dnsDomain: ${CLUSTER_DOMAIN:-kubernetes.local}
   serviceSubnet: ${NETWORKING_SERVICE_SUBNET:-10.3.0.0/16}
   podSubnet: ${NETWORKING_POD_SUBNET:-10.2.0.0/16}
-kubernetesVersion: ${KUBERNETES_VERSION:-1.10.0}
+kubernetesVersion: ${KUBERNETES_VERSION:-1.11.3}
 nodeName: $(hostname)
 authorizationModes:
 $(echo "${AUTHORIZATION_MODES:-Node,RBAC}" | cut -d, -f1- --output-delimiter=$'\n' | sed 's/\(.*\)/- \1/g')
