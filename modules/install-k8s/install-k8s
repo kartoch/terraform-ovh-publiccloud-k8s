@@ -86,9 +86,15 @@ function install_dependencies {
   if [ -n "$(command -v yum)" ]; then
       # curl to download or interact with apis,
       # docker to run kubernetes infra # Not tested
-      sudo yum install -y curl docker
+      sudo yum install -y docker
+  elif [ -n "$(command -v apt-get)" ] && [ -n "$(command -v ubuntu-bug)" ]; then
+      log_info "Ubuntu based. upgrading system and installing docker"
+      echo "Debian based. upgrading system." >&2
+      export DEBIAN_FRONTEND=noninteractive
+      sudo -E apt update -y -q
+      sudo -E apt install --no-install-recommends -q -y jq docker.io
   elif [ -n "$(command -v coreos-install)" ]; then
-       log_info "Nothing to do for coreos"
+      log_info "Nothing to do for coreos"
   else
       log_error "Could not find yum. Cannot install dependencies on this OS."
       exit 1
@@ -201,22 +207,22 @@ function pull_needed_image(){
     local readonly kubedns_version="$5"
     local readonly pause_version="$6"
 
-    # docker pulls are silent to avoid log pollution in CI builds
+    # docker pull are silent to avoid log pollution in CI builds
 
     # Control plane
-    docker pull "gcr.io/google_containers/kube-apiserver-amd64:v${k8s_version}" >/dev/null 2>&1
-    docker pull "gcr.io/google_containers/kube-scheduler-amd64:v${k8s_version}"  >/dev/null 2>&1
-    docker pull "gcr.io/google_containers/kube-controller-manager-amd64:v${k8s_version}"  >/dev/null 2>&1
-    docker pull "gcr.io/google_containers/kube-proxy-amd64:v${k8s_version}" >/dev/null 2>&1
+    sudo docker pull "gcr.io/google_containers/kube-apiserver-amd64:v${k8s_version}" >/dev/null 2>&1
+    sudo docker pull"gcr.io/google_containers/kube-scheduler-amd64:v${k8s_version}"  >/dev/null 2>&1
+    sudo docker pull "gcr.io/google_containers/kube-controller-manager-amd64:v${k8s_version}"  >/dev/null 2>&1
+    sudo docker pull "gcr.io/google_containers/kube-proxy-amd64:v${k8s_version}" >/dev/null 2>&1
     # CNI
-    docker pull "quay.io/calico/node:v${calico_node_version}" >/dev/null 2>&1
-    docker pull "quay.io/calico/cni:v${calico_cni_version}" >/dev/null 2>&1
-    docker pull "quay.io/coreos/flannel:v${flannel_version}" >/dev/null 2>&1
+    sudo docker pull "quay.io/calico/node:v${calico_node_version}" >/dev/null 2>&1
+    sudo docker pull "quay.io/calico/cni:v${calico_cni_version}" >/dev/null 2>&1
+    sudo docker pull "quay.io/coreos/flannel:v${flannel_version}" >/dev/null 2>&1
     # Warning fixed version
-    docker pull "gcr.io/google_containers/pause-amd64:${pause_version}" >/dev/null 2>&1
-    docker pull "gcr.io/google_containers/k8s-dns-sidecar-amd64:${kubedns_version}" >/dev/null 2>&1
-    docker pull "gcr.io/google_containers/k8s-dns-kube-dns-amd64:${kubedns_version}" >/dev/null 2>&1
-    docker pull "gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64:${kubedns_version}" >/dev/null 2>&1
+    sudo docker pull "gcr.io/google_containers/pause-amd64:${pause_version}" >/dev/null 2>&1
+    sudo docker pull "gcr.io/google_containers/k8s-dns-sidecar-amd64:${kubedns_version}" >/dev/null 2>&1
+    sudo docker pull "gcr.io/google_containers/k8s-dns-kube-dns-amd64:${kubedns_version}" >/dev/null 2>&1
+    sudo docker pull "gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64:${kubedns_version}" >/dev/null 2>&1
 }
 
 function setup_systemd {
