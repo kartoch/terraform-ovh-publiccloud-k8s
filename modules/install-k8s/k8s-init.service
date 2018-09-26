@@ -1,15 +1,13 @@
 [Unit]
 Description=Bootstrap a Kubernetes cluster with kubeadm
 Wants=etcd.service
-Requires=k8s-get-certs.service
-After=etcd.service k8s-get-certs.service
+After=etcd.service
 ConditionPathExists=!/opt/k8s/init.done
 
-[Service]
-RemainAfterExit=true
+[Service]  
 Restart=on-failure
-StartLimitInterval=0
-RestartSec=10
+RestartSec=10s
+
 Environment=MASTER_MODE=0
 Environment=WORKER_MODE=0
 Environment=ETCD_ENDPOINTS=https://127.0.0.1:2379
@@ -31,6 +29,7 @@ Environment=AUTHORIZATION_MODES=Node,RBAC
 
 EnvironmentFile=/etc/sysconfig/kubernetes.conf
 
+ExecStartPre=/opt/k8s/k8s-get-certs
 ExecStart=/opt/k8s/k8s-init
 
 [Install]

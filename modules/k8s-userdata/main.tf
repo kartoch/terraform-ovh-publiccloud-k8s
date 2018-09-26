@@ -43,7 +43,7 @@ ETCD_ENDPOINTS=${join(",", compact(list(var.etcd_endpoints, (var.etcd? module.et
 API_ENDPOINT=${var.api_endpoint}
 CFSSL_ENDPOINT=${var.cfssl_endpoint == "" ? module.cfssl.endpoint : var.cfssl_endpoint}
 CLUSTER_DNS=${cidrhost(var.service_cidr, 10)}
-CLUSTER_DOMAIN=${var.datacenter}.${var.domain}
+CLUSTER_DOMAIN=${var.domain}
 NETWORKING_SERVICE_SUBNET=${var.service_cidr}
 NETWORKING_POD_SUBNET=${var.pod_cidr}
 API_SERVER_CERT_SANS=${join(",", var.ipv4_addrs)}

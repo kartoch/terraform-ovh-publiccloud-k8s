@@ -28,8 +28,6 @@ resource "null_resource" "post_install_k8s" {
   --calico-node-version ${var.calico_node_version} \
   --calico-cni-version ${var.calico_cni_version} \
   --flannel-version ${var.flannel_version} \
-  --kubedns-version ${var.kubedns_version} \
-  --pause-version ${var.pause_version} \
   --cni-plugins-version ${var.k8s_cni_plugins_version} \
   --sha1sum-cni-plugins ${var.k8s_sha1sum_cni_plugins} \
   --sha1sum-kubeadm ${var.k8s_sha1sum_kubeadm} \
@@ -39,7 +37,7 @@ EOF
   }
 
   provisioner "remote-exec" {
-    inline = "sudo systemctl start k8s-init.path kubelet.path"
+    inline = "sudo systemctl start k8s-init.path kubelet.service"
   }
 }
 

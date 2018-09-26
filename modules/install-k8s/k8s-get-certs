@@ -18,7 +18,7 @@ function get_etcd_cert(){
     purpose=${5}
 
     # generating new tls certs if there's no certs or existing certs are invalid or older than one hour."
-    if [ ! -f "${cert}" ] || find "${cert}" -mmin "+60" | egrep '*' \
+    if [ ! -f "${cert}" ] || [ ! -f "${key}" ] || find "${cert}" -mmin "+60" | egrep '*' \
            || ! openssl verify -purpose "${purpose}" -CAfile "${ca}" "${cert}"; then
         echo "generating new certs (either too old, no existent or invalid)" >&2
         certs_json=$(echo "$csr" | curl --cacert "${ca}" --connect-timeout 1 --silent --fail -d @- \
@@ -29,7 +29,8 @@ function get_etcd_cert(){
             certs_dir_temp=$(mktemp -d)
             echo "$certs_json" | jq -r '.result.certificate' > "${certs_dir_temp}"/"$(basename "$cert")"
             echo "$certs_json" | jq -r '.result.private_key' > "${certs_dir_temp}"/"$(basename "$key")"
-            mv "${certs_dir_temp}"/"$(basename "$cert")" "${certs_dir_temp}"/"$(basename "$key")" "$(dirname "$cert")"/ && rmdir "${certs_dir_temp}"
+            tar -cf - -C "${certs_dir_temp}" "$(basename "$cert")" "$(basename "$key")" | tar -C "$(dirname "$cert")" -xv
+            rm -Rf "${certs_dir_temp}"
         else
             echo "error while generating cert. exiting." >&2
             return 1
@@ -38,6 +39,24 @@ function get_etcd_cert(){
         echo "cert is already here and valid" >&2
     fi
 }
+
+if [ -z "$CFSSL_ENDPOINT" ]; then
+    log user.info "no cfssl endpoint set. cannot get certs. nothing to do"
+    exit 0
+fi
+
+if [ -z "$ETCD_CA_FILE" ]; then
+    log user.info "ETCD_CA_FILE env var not set. nothing to do"
+    exit 0
+fi
+if [ -z "$ETCD_CERT_FILE" ]; then
+    log user.info "ETCD_CERT_FILE env var not set. nothing to do"
+    exit 0
+fi
+if [ -z "$ETCD_KEY_FILE" ]; then
+    log user.info "ETCD_KEY_FILE env var not set. nothing to do"
+    exit 0
+fi
 
 # creating directories
 mkdir -p "$(dirname $ETCD_CA_FILE)" \
@@ -49,7 +68,7 @@ if ! get_etcd_ca; then
     exit 1
 fi
 
-ETCD_CSR='{ "request": {"CN": "'$(hostname)'.'${CLUSTER_DOMAIN}'" },  "profile": "client"}'
+ETCD_CSR='{ "request": {"CN":"'${CLUSTER_DOMAIN}'"}, "profile": "client"}'
 if ! get_etcd_cert "${ETCD_CA_FILE}" "$ETCD_CERT_FILE" "$ETCD_KEY_FILE" "$ETCD_CSR" sslclient; then
     echo "unable to gen etcd cert from cfssl server" >&2
     exit 1

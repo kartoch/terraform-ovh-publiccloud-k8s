@@ -53,16 +53,6 @@ variable "flannel_version" {
   default     = "0.9.1"
 }
 
-variable "kubedns_version" {
-  description = "The version of kubedns to install with the post installation script if `post_install_module` is set to true"
-  default     = "1.14.11"
-}
-
-variable "pause_version" {
-  description = "The version of pause to install with the post installation script if `post_install_module` is set to true"
-  default     = "3.0"
-}
-
 variable "k8s_cni_plugins_version" {
   description = "The version of the cni plugins to install with the post installation script if `post_install_module` is set to true"
   default     = "0.7.1"
