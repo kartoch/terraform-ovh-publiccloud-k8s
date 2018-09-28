@@ -1,14 +1,6 @@
 # Simple Kubernetes Cluster from a prebuilt Glance Image
 
-This examples shows how to use the `terraform-ovh-publiccloud-k8s` module to 
-launch a simple Kubernetes cluster on OVH Public Cloud, based on a `CoreOS Stable`
-image with kubernetes preinstalled, without post-provisionning.
-
-- [Simple Kubernetes Cluster from a prebuilt Glance Image](#simple-kubernetes-cluster-from-a-prebuilt-glance-image)
-    - [Pre-Requisites](#pre-requisites)
-    - [Configuration](#configuration)
-    - [Launch the cluster](#launch-the-cluster)
-    - [Get started with Kubernetes](#get-started-with-kubernetes)
+This examples shows how to use the terraform-ovh-publiccloud-k8s module to launch a simple Kubernetes cluster on OVH Public Cloud, based on a CoreOS Stable image with kubernetes preinstalled, without post-provisionning.
 
 ## Pre-requisites
 
@@ -61,9 +53,9 @@ image with kubernetes preinstalled, without post-provisionning.
    $ ssh-add ./ssh_key
    ```
 
-## Configuration
+## Quickstart
 
-1. You have to init terraform (run once):
+### Initialisation
 
 ```bash
 $ terraform init
@@ -74,42 +66,46 @@ Initializing modules...
 Terraform has been successfully initialized!
 ```
 
-1. (Optional) Customize default values file, then edit it if needed.
-   This allow terraform to autoload those variables
+Wait for the successfull initialization of terraform.
 
-   ```bash
-   cp terraform.tfvars.sample terraform.tfvars
-   ```
+### Launch the cluster
 
-## Launch the cluster
+You have to choose an openstack region to launch the cluster in, and a keypair name. You can either setup these variables in the customized `.tfvars` file or pass them in the command line.
 
-You have to choose an openstack region to launch the cluster in, and a keypair name and/or ssh public key according to your preferences. You can either setup these variables in the customized `.tfvars` file (see [previous paragraph](#configuration)) or pass them in the command line:
-
-Using an openstack keypair:
+In order to list your OpenStack compute regions, you can perform this command:
 
 ```bash
-$ terraform apply -var region=GRA3 -var key_pair=k8s
-[...]
+$ openstack catalog show nova
 ```
 
-Or using an ssh public key:
+Export your choice in an env variable:
 
 ```bash
-$ terraform apply -var region=GRA3 -var public_sshkey=./ssh_key.pub
-[...]
+$ export OS_REGION_NAME=<REGION-NAME>
 ```
 
+Regarding the keypair name, you can easily find the keypairs associated to your project in the selected region:
 
-This should give you an infra with:
+```bash
+$ openstack keypair list
+```
 
-* 3 kubernetes masters in a public network with:
-  * Canal (Flannel + Calico) CNI
-  * Untainted nodes (pods can run on masters)
-  * kube-proxy for services
+Export the keypair name in an env variable:
+```bash
+$ export OS_KEYPAIR_NAME=<KEYPAIR-NAME>
+```
+
+Then, start the cluster:
+
+```bash
+$ terraform apply -var region=$OS_REGION_NAME -var key_pair=$OS_KEYPAIR_NAME
+```
+
+This should give you an infra with 3 kubernetes masters in a public network with Canal (Flannel + Calico) CNI, Untainted nodes (pods can run on masters), kube-proxy for services.
 
 ## Get Started with Kubernetes
 
-Get help with following command:
+Use this command to get some help. Do not forget that all the SSH commands have to be performed from a terminal on your personal computer where your SSH key is deployed.
 
 ```bash
 $ terraform output helper
@@ -128,4 +124,38 @@ You can also ssh into one of your instances:
     $ ssh core@A.B.C.F
 
 Enjoy!
+```
+
+## More configuration
+
+### Configure flavor
+
+If you want to configure the type of instances you will start on your Kubernetes cluster, you can simply override the default value.
+
+First of all, list all available flavors.
+
+```bash
+$ openstack flavor list -c Name -c RAM -c Disk -c VCPUs
+```
+
+Export the choosen flavor.
+
+```bash
+$ export OS_FLAVOR_NAME=<FLAVOR-NAME>
+```
+
+### Configure number of nodes
+
+By default, we start 3 instances on your project.
+
+```bash
+$ export NODES=5
+```
+
+### Start your cluster
+
+Then, start the cluster with your custom configuration:
+
+```bash
+$ terraform apply -var region=$OS_REGION_NAME -var key_pair=$OS_KEYPAIR_NAME -var flavor_name=$OS_FLAVOR_NAME -var count=$NODES
 ```
