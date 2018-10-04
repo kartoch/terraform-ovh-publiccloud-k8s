@@ -280,5 +280,5 @@ variable "worker_mode" {
 
 variable "api_endpoint" {
   description = "Kubernetes API endpoint (single IP or hostname) with port"
-  default     = "127.0.0.1:6443"
+  default     = ""
 }

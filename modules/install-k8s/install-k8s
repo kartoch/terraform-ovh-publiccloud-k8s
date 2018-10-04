@@ -8,7 +8,7 @@ readonly DEFAULT_INSTALL_PATH="/opt/k8s"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_NAME="$(basename "$0")"
 
-readonly DEFAULT_K8S_VERSION="1.11.3"
+readonly DEFAULT_K8S_VERSION="1.12.0"
 readonly DEFAULT_CALICO_NODE_VERSION="3.1.2"
 readonly DEFAULT_CALICO_CNI_VERSION="3.1.2"
 readonly DEFAULT_FLANNEL_VERSION="0.9.1"
@@ -16,9 +16,9 @@ readonly DEFAULT_ETCD_VERSION="3.3.9"
 readonly DEFAULT_CRICTL_VERSION="1.11.1"
 readonly DEFAULT_K8S_CNI_PLUGINS_VERSION="0.7.1"
 readonly DEFAULT_K8S_SHA1SUM_CNI_PLUGINS="fb29e20401d3e9598a1d8e8d7992970a36de5e05"
-readonly DEFAULT_K8S_SHA1SUM_KUBELET="2c24374244482fc629776366df4f416a1b25ade4"
-readonly DEFAULT_K8S_SHA1SUM_KUBECTL="5a336ea470a0053b1893fda89a538b6197566137"
-readonly DEFAULT_K8S_SHA1SUM_KUBEADM="f127dccad906ee914af8b889bb60c07f402ed025"
+readonly DEFAULT_K8S_SHA1SUM_KUBELET="2948b9afd0e8e3181d18b83f87533afd6e5f4970"
+readonly DEFAULT_K8S_SHA1SUM_KUBECTL="85904f6caa295eaeef10e1b59a5e9f823e7b4825"
+readonly DEFAULT_K8S_SHA1SUM_KUBEADM="ec4f55d51b72e481d29f9cf8bc96f6c441976a53"
 readonly DEFAULT_SHA256SUM_ETCD="7b95bdc6dfd1d805f650ea8f886fdae6e7322f886a8e9d1b0d14603767d053b1"
 readonly DEFAULT_SHA1SUM_CRICTL="767cb6e6ab5a9202d851950743a500a09d08faf5"
 
@@ -82,13 +82,13 @@ function install_dependencies {
   if [ -n "$(command -v yum)" ]; then
       # curl to download or interact with apis,
       # docker to run kubernetes infra # Not tested
-      sudo yum install -y docker
+      sudo yum install -y docker socat
   elif [ -n "$(command -v apt-get)" ] && [ -n "$(command -v ubuntu-bug)" ]; then
       log_info "Ubuntu based. upgrading system and installing docker"
       echo "Debian based. upgrading system." >&2
       export DEBIAN_FRONTEND=noninteractive
       sudo -E apt update -y -q
-      sudo -E apt install --no-install-recommends -q -y jq docker.io
+      sudo -E apt install --no-install-recommends -q -y jq docker.io socat
       sudo usermod -aG docker ubuntu
   elif [ -n "$(command -v coreos-install)" ]; then
       log_info "Nothing to do for coreos"

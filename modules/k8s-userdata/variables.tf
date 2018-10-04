@@ -149,5 +149,5 @@ variable "cfssl_port" {
 
 variable "api_endpoint" {
   description = "Kubernetes API endpoint (single IP or hostname)"
-  default     = "127.0.0.1"
+  default     = ""
 }
