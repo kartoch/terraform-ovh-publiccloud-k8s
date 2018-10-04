@@ -7,6 +7,16 @@ variable "flavor_name" {
   default     = "s1-8"
 }
 
+variable "image_name" {
+  description = "Image to use"
+  default     = "CoreOS Stable - OVH Kubernetes"
+}
+
+variable "image_tag" {
+  description = "Image tag to use"
+  default     = "latest"
+}
+
 variable "name" {
   description = "The name of the cluster. This attribute will be used to name openstack resources"
   default     = "myk8s"

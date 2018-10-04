@@ -18,6 +18,8 @@ module "k8s" {
   worker_mode            = true
   cfssl                  = true
   etcd                   = true
+  image_name             = "${var.image_name}"
+  image_tag              = "${var.image_tag}"
   flavor_name            = "${var.flavor_name}"
   create_secgroups       = true
   key_pair               = "${var.key_pair}"

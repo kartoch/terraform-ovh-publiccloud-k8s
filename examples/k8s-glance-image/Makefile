@@ -1,4 +1,4 @@
-all: coreos centos7
+all: coreos centos7 ubuntu1604
 
 coreos:
 	@./build.sh coreos
