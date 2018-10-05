@@ -20,7 +20,7 @@ module "k8s" {
   ssh_authorized_keys    = ["${file(var.public_sshkey == "" ? "/dev/null" : var.public_sshkey)}"]
   post_install_modules   = false
   image_name             = "Ubuntu 16.04 K8s"
-  image_tag              = "v0.2.0-11-g4e70a1d"
+  image_tag              = "v0.2.0-12-g5ee1fd1"
   flavor_name            = "${var.flavor_name}"
   create_secgroups       = true
   ssh_user               = "ubuntu"
