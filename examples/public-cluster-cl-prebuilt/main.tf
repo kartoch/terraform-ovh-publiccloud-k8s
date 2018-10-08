@@ -3,7 +3,9 @@ provider "openstack" {
   region    = "${var.region}"
 }
 
+
 data "http" "myip" {
+  count = "${var.remote_ip_prefix == "" ? 1 : 0}"
   url = "https://api.ipify.org/"
 }
 
@@ -28,7 +30,7 @@ resource "openstack_networking_secgroup_rule_v2" "in_traffic_k8s_sg" {
   direction         = "ingress"
   ethertype         = "IPv4"
   protocol          = "tcp"
-  remote_ip_prefix  = "${var.remote_ip_prefix == "" ? format("%s/32", data.http.myip.body) : var.remote_ip_prefix}"
+  remote_ip_prefix  = "${var.remote_ip_prefix == "" ? join("", formatlist("%s/32", data.http.myip.*.body)) : var.remote_ip_prefix}"
   port_range_min    = 6443
   port_range_max    = 6443
   security_group_id = "${module.k8s.master_group_id}"
@@ -38,7 +40,7 @@ resource "openstack_networking_secgroup_rule_v2" "in_traffic_ssh_master" {
   direction         = "ingress"
   ethertype         = "IPv4"
   protocol          = "tcp"
-  remote_ip_prefix  = "${var.remote_ip_prefix == "" ? format("%s/32", data.http.myip.body) : var.remote_ip_prefix}"
+  remote_ip_prefix  = "${var.remote_ip_prefix == "" ? join("", formatlist("%s/32", data.http.myip.*.body)) : var.remote_ip_prefix}"
   port_range_min    = 22
   port_range_max    = 22
   security_group_id = "${module.k8s.master_group_id}"
