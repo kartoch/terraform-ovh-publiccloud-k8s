@@ -92,13 +92,21 @@ $ openstack keypair list
 
 Export the keypair name in an env variable:
 ```bash
-$ export OS_KEYPAIR_NAME=<KEYPAIR-NAME>
+$ export TF_VAR_key_pair=<KEYPAIR-NAME>
+```
+
+For security reasons, you can configure the IP that will access to your cluster.
+
+The default value, 0.0.0.0/0, accepts all IPs.
+
+```bash
+$ export TF_VAR_remote_ip_prefix=0.0.0.0/0
 ```
 
 Then, start the cluster:
 
 ```bash
-$ terraform apply -var region=$OS_REGION_NAME -var key_pair=$OS_KEYPAIR_NAME
+$ terraform apply -var region=$OS_REGION_NAME
 ```
 
 This should give you an infra with 3 kubernetes masters in a public network with Canal (Flannel + Calico) CNI, Untainted nodes (pods can run on masters), kube-proxy for services.
@@ -141,7 +149,7 @@ $ openstack flavor list -c Name -c RAM -c Disk -c VCPUs
 Export the choosen flavor.
 
 ```bash
-$ export OS_FLAVOR_NAME=<FLAVOR-NAME>
+$ export TF_VAR_flavor_name=<FLAVOR-NAME>
 ```
 
 ### Configure number of nodes
@@ -149,7 +157,7 @@ $ export OS_FLAVOR_NAME=<FLAVOR-NAME>
 By default, we start 3 instances on your project.
 
 ```bash
-$ export NODES=5
+$ export TF_VAR_count=5
 ```
 
 ### Start your cluster
@@ -157,5 +165,5 @@ $ export NODES=5
 Then, start the cluster with your custom configuration:
 
 ```bash
-$ terraform apply -var region=$OS_REGION_NAME -var key_pair=$OS_KEYPAIR_NAME -var flavor_name=$OS_FLAVOR_NAME -var count=$NODES
+$ terraform apply -var region=$OS_REGION_NAME
 ```
