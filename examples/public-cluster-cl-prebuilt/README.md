@@ -97,7 +97,8 @@ $ export TF_VAR_key_pair=<KEYPAIR-NAME>
 
 For security reasons, you can configure the IP that will access to your cluster.
 
-The default value, 0.0.0.0/0, accepts all IPs.
+The default value infers your public IPv4 from the api.ipify.org service.
+You can override this behaviour by setting the "remote_ip_pefix" variable to a wider ip range. The next example accepts any source IPv4.
 
 ```bash
 $ export TF_VAR_remote_ip_prefix=0.0.0.0/0
