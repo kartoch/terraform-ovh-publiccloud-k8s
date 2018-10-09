@@ -55,6 +55,15 @@ This examples shows how to use the terraform-ovh-publiccloud-k8s module to launc
 
 ## Quickstart
 
+### Remote state
+
+You can enable & customize the remote state backend used by terraform to store the states files by 
+running the following commands and editing the `remotestate.tf` file:
+
+```bash
+cp remotestate.tf.sample remotestate.tf
+```
+
 ### Initialisation
 
 ```bash
