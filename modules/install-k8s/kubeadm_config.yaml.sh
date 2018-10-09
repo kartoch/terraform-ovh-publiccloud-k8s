@@ -22,7 +22,7 @@ kubeProxy:
   config:
     mode: ${KUBEPROXY_CONFIG_MODE:-iptables}
 networking:
-  dnsDomain: ${CLUSTER_DOMAIN:-kubernetes.local}
+  dnsDomain: ${CLUSTER_DOMAIN:-cluster.local}
   serviceSubnet: ${NETWORKING_SERVICE_SUBNET:-10.3.0.0/16}
   podSubnet: ${NETWORKING_POD_SUBNET:-10.2.0.0/16}
 nodeName: $(hostname)

@@ -5,6 +5,7 @@ Requires=docker.service
 After=docker.service
 
 [Service]
+Environment=PATH=/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 Environment=KUBELET_ADDRESS=0.0.0.0
 Environment=KUBELET_BOOTSTRAP_CONFIG=/etc/kubernetes/bootstrap-kubelet.conf
 Environment=KUBELET_CONFIG=/etc/kubernetes/kubelet.conf
@@ -12,7 +13,7 @@ Environment=POD_MANIFEST_PATH=/etc/kubernetes/manifests
 Environment=CNI_CONF_DIR=/etc/cni/net.d
 Environment=CNI_BIN_DIR=/opt/cni/bin
 Environment=CLUSTER_DNS=10.3.0.10
-Environment=CLUSTER_DOMAIN=kubernetes.local
+Environment=CLUSTER_DOMAIN=cluster.local
 Environment=AUTH_MODE=Webhook
 Environment=CLIENT_CA_FILE=/etc/kubernetes/pki/ca.crt
 Environment=VOLUME_PLUGIN_DIR=/var/lib/kubelet/volumeplugins

@@ -1,6 +1,5 @@
 #!/bin/bash
 # This script can be used to install Kubernetes and its dependencies. This script has been tested with the CentOS 7 operating system.
-
 set -e
 
 readonly DEFAULT_INSTALL_PATH="/opt/k8s"
@@ -105,8 +104,8 @@ function create_k8s_install_paths {
   sudo mkdir -p "$path/bin"
   sudo echo "export PATH=\$PATH:$path/bin"  | sudo tee /etc/profile.d/k8s_path.sh > /dev/null
   sudo chmod +x /etc/profile.d/k8s_path.sh
-  sudo cp $SCRIPT_DIR/{k8s-init,k8s-get-certs,kubeadm-init,kubeadm_config.yaml.sh,cni-manifest.yaml.sh} "$path"
-  sudo chmod +x "$path"/{k8s-init,k8s-get-certs,kubeadm-init,kubeadm_config.yaml.sh,cni-manifest.yaml.sh}
+  sudo cp $SCRIPT_DIR/{k8s-init,k8s-get-certs,kubeadm-init,kubeadm_config.yaml.sh,cni-manifest.yaml.sh,coredns-manifest.yaml.sh} "$path"
+  sudo chmod +x "$path"/{k8s-init,k8s-get-certs,kubeadm-init,kubeadm_config.yaml.sh,cni-manifest.yaml.sh,coredns-manifest.yaml.sh}
 }
 
 function check_sha1sum {
@@ -116,7 +115,7 @@ function check_sha1sum {
 
   if [ "$sha1sum" != "$computed_sha1sum" ]; then
     log_error "dl binary checksum error for path $path: $sha1sum != $computed_sha1sum"
-    exit 1
+    exit 1b
   fi
 }
 
@@ -149,6 +148,8 @@ function install_binary {
   sudo curl --silent --fail -L -o "$download_path" "$url"
   check_sha1sum "$download_path" "$sha1sum"
   sudo chmod +x "$download_path"
+  sudo mkdir -p /opt/bin
+  sudo ln -fs "${download_path}" /opt/bin/
 }
 
 function install_etcdctl {

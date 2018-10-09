@@ -30,6 +30,7 @@ data "template_file" "systemd_network_files" {
     ${indent(4, format(local.networkd_route_tpl, var.host_cidr))}
     [DHCP]
     RouteMetric=2048
+    UseDNS=no
 - path: /etc/systemd/network/20-eth1.network
   permissions: '0644'
   content: |
@@ -39,6 +40,18 @@ data "template_file" "systemd_network_files" {
     DHCP=ipv4
     [DHCP]
     RouteMetric=2048
+    UseDNS=no
+TPL
+}
+
+data "template_file" "systemd_resolved_file" {
+  template = <<TPL
+- path: /etc/systemd/resolved.conf
+  permissions: '0644'
+  content: |
+    [Resolve]
+    DNS=${local.cluster_dns} ${length(split("/", var.upstream_resolver)) > 1 ? "213.186.33.99" : element(split(":", var.upstream_resolver), 0)}
+    Domains=${var.domain}
 TPL
 }
 
@@ -106,6 +119,7 @@ write_files:
   ${var.worker_mode ? indent(2, data.template_file.modprobe.rendered) : ""}
   ${indent(2, data.template_file.kubernetes_conf.rendered)}
   ${indent(2, data.template_file.systemd_network_files.rendered)}
+  ${indent(2, data.template_file.systemd_resolved_file.rendered)}
   - path: /etc/sysconfig/network-scripts/route-eth0
     content: |
       ${indent(6, format(local.eth_route_tpl, var.host_cidr, "eth0"))}

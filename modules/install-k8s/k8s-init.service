@@ -21,7 +21,9 @@ Environment=PKI_ETCD_KEY=k8s/admin/pki
 Environment=MASTERS_ETCD_KEYPREFIX=k8s/masters
 Environment=INIT_ETCD_LOCK=k8s/admin/k8s-init-lock
 
-Environment=CLUSTER_DOMAIN=kubernetes.local
+Environment=POD_MANIFEST_PATH=/etc/kubernetes/manifests
+Environment=CLUSTER_DOMAIN=cluster.local
+Environment=UPSTREAM_RESOLVER=213.186.33.99:53
 Environment=NETWORKING_SERVICE_SUBNET=10.3.0.0/16
 Environment=NETWORKING_POD_SUBNET=10.2.0.0/16
 Environment=API_SERVER_CERT_SANS=127.0.0.1

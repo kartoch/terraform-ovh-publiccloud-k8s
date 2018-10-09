@@ -41,7 +41,7 @@ resource "openstack_networking_port_v2" "public_port_k8s" {
   admin_state_up = "true"
 
   security_group_ids = [
-    "${compact(concat(var.security_group_ids, list((var.create_secgroups && var.master_mode ? module.secgroups.master_group_id : ""), (var.create_secgroups && var.worker_mode ? module.secgroups.worker_group_id : ""))))}"
+    "${compact(concat(var.security_group_ids, list((var.create_secgroups && var.master_mode ? module.secgroups.master_group_id : ""), (var.create_secgroups && var.worker_mode ? module.secgroups.worker_group_id : ""))))}",
   ]
 }
 
@@ -101,6 +101,7 @@ module "userdata" {
   etcd                 = "${var.etcd}"
   etcd_initial_cluster = "${var.etcd_initial_cluster}"
   etcd_endpoints       = "${var.etcd_endpoints}"
+  upstream_resolver    = "${var.upstream_resolver}"
 
   # if private ipv4 addrs are set, prefer them over public addrs;
   # they will notably be used to set etcd_initial_cluster attr.
