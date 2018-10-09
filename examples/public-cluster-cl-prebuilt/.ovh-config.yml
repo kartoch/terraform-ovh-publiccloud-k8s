@@ -3,3 +3,4 @@ description: Simple k8s cluster from a prebuilt glance image
 
 install:
   - cp terraform.tfvars.sample terraform.tfvars
+  - cp remotestate.tf.sample remotestate.tf
