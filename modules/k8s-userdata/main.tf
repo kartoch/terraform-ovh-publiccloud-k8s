@@ -1,5 +1,6 @@
 locals {
-  scheme = "${var.cfssl ? "https" : "http"}"
+  scheme      = "${var.cfssl ? "https" : "http"}"
+  cluster_dns = "${cidrhost(var.service_cidr, 10)}"
 }
 
 module "cfssl" {
@@ -24,8 +25,8 @@ module "cfssl" {
 }
 
 module "etcd" {
-  source  = "ovh/publiccloud-etcd/ovh//modules/etcd-userdata"
-  version = "0.1.2"
+  source               = "ovh/publiccloud-etcd/ovh//modules/etcd-userdata"
+  version              = "0.1.2"
   count                = "${var.count}"
   name                 = "${var.name}"
   domain               = "${var.domain}"
@@ -42,8 +43,9 @@ data "template_file" "k8s_vars" {
 ETCD_ENDPOINTS=${join(",", compact(list(var.etcd_endpoints, (var.etcd? module.etcd.etcd_endpoints: ""))))}
 API_ENDPOINT=${var.api_endpoint}
 CFSSL_ENDPOINT=${var.cfssl_endpoint == "" ? module.cfssl.endpoint : var.cfssl_endpoint}
-CLUSTER_DNS=${cidrhost(var.service_cidr, 10)}
+CLUSTER_DNS=${local.cluster_dns}
 CLUSTER_DOMAIN=${var.domain}
+UPSTREAM_RESOLVER=${var.upstream_resolver}
 NETWORKING_SERVICE_SUBNET=${var.service_cidr}
 NETWORKING_POD_SUBNET=${var.pod_cidr}
 API_SERVER_CERT_SANS=${join(",", var.ipv4_addrs)}

@@ -30,6 +30,7 @@ data "template_file" "systemd_network_files" {
     ${indent(4, format(local.networkd_route_tpl, var.host_cidr))}
     [DHCP]
     RouteMetric=2048
+    UseDNS=no
 - path: /etc/systemd/network/20-eth1.network
   permissions: '0644'
   content: |
@@ -39,6 +40,18 @@ data "template_file" "systemd_network_files" {
     DHCP=ipv4
     [DHCP]
     RouteMetric=2048
+    UseDNS=no
+TPL
+}
+
+data "template_file" "systemd_resolved_file" {
+  template = <<TPL
+- path: /etc/systemd/resolved.conf
+  permissions: '0644'
+  content: |
+    [Resolve]
+    DNS=${local.cluster_dns} ${length(split("/", var.upstream_resolver)) > 1 ? "213.186.33.99" : element(split(":", var.upstream_resolver), 0)}
+    Domains=${var.domain}
 TPL
 }
 
@@ -71,6 +84,18 @@ data "template_file" "kubernetes_conf" {
 TPL
 }
 
+data "template_file" "modprobe" {
+  template = <<TPL
+- path: /etc/modules-load.d/ip_vs.conf
+  mode: 0644
+  content: |
+    ip_vs
+    ip_vs_rr
+    ip_vs_wrr
+    ip_vs_sh
+TPL
+}
+
 data "template_file" "cfssl_files" {
   template = <<TPL
 ${var.cacert != "" && var.cacert_key != "" ? data.template_file.cfssl_ca_files.rendered : ""}
@@ -91,8 +116,10 @@ ssh_authorized_keys:
 write_files:
   ${var.master_mode && var.cfssl && var.cfssl_endpoint == "" && count.index == 0 ? indent(2, element(data.template_file.cfssl_files.*.rendered, count.index)) : ""}
   ${var.master_mode && var.etcd ? indent(2, element(data.template_file.etcd_conf.*.rendered, count.index)) : ""}
+  ${var.worker_mode ? indent(2, data.template_file.modprobe.rendered) : ""}
   ${indent(2, data.template_file.kubernetes_conf.rendered)}
   ${indent(2, data.template_file.systemd_network_files.rendered)}
+  ${indent(2, data.template_file.systemd_resolved_file.rendered)}
   - path: /etc/sysconfig/network-scripts/route-eth0
     content: |
       ${indent(6, format(local.eth_route_tpl, var.host_cidr, "eth0"))}

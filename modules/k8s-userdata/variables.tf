@@ -54,6 +54,11 @@ variable "etcd_endpoints" {
   default     = ""
 }
 
+variable "upstream_resolver" {
+  description = "coredns upstream dns resolver. can take either a file path such as /etc/resolv.conf or a dns nameserver in the form `213.186.33.99:53`"
+  default = "213.186.33.99:53"
+}
+
 variable "master_mode" {
   description = "Determines if the node is a master"
   default     = false
@@ -149,5 +154,5 @@ variable "cfssl_port" {
 
 variable "api_endpoint" {
   description = "Kubernetes API endpoint (single IP or hostname)"
-  default     = "127.0.0.1"
+  default     = ""
 }

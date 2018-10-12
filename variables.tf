@@ -141,6 +141,11 @@ EOD
   default = "10.3.0.0/16"
 }
 
+variable "upstream_resolver" {
+  description = "coredns upstream dns resolver. can take either a file path such as /etc/resolv.conf or a dns nameserver in the form `213.186.33.99:53`"
+  default = "213.186.33.99:53"
+}
+
 variable "post_install_modules" {
   description = "Setting this variable to true will assume the necessary software to boot the cluster hasn't packaged in the image and thus will be post provisionned. Defaults to `true`"
   default     = false
@@ -280,5 +285,5 @@ variable "worker_mode" {
 
 variable "api_endpoint" {
   description = "Kubernetes API endpoint (single IP or hostname) with port"
-  default     = "127.0.0.1:6443"
+  default     = ""
 }
