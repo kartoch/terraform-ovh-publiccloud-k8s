@@ -46,7 +46,7 @@ variable "image_tag" {
 
 variable "image_version" {
   description = "DEPRECATED The version of the prebuilt glance image to run in the cluster."
-  default     = "latest"
+  default     = ""
 }
 
 variable "flavor_name" {

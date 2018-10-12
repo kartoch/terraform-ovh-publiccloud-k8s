@@ -8,9 +8,7 @@ data "openstack_images_image_v2" "k8s" {
   name        = "${var.image_name}"
   most_recent = true
 
-  properties {
-    tag = "${var.image_version != "latest" && var.image_version != "" ? var.image_version : var.image_tag}"
-  }
+  properties = "${map((var.image_version != "" ? "version" : "tag"), (var.image_version != "" ? var.image_version : var.image_tag))}"
 }
 
 data "openstack_networking_subnet_v2" "subnets" {
@@ -169,7 +167,7 @@ resource "openstack_compute_instance_v2" "singlenet_k8s" {
 
 module "post_install_cfssl" {
   source  = "ovh/publiccloud-cfssl/ovh//modules/install-cfssl"
-  version = ">= 0.1.3"
+  version = ">= 0.1.10"
 
   count            = "${var.post_install_modules && var.cfssl && var.count >= 1 ? 1 : 0}"
   triggers         = ["${element(concat(openstack_compute_instance_v2.singlenet_k8s.*.id, openstack_compute_instance_v2.multinet_k8s.*.id), 0)}"]
@@ -181,7 +179,7 @@ module "post_install_cfssl" {
 
 module "post_install_etcd" {
   source  = "ovh/publiccloud-etcd/ovh//modules/install-etcd"
-  version = "0.1.2"
+  version = "0.1.5"
 
   count            = "${var.post_install_modules && var.etcd ? var.count : 0}"
   triggers         = ["${concat(openstack_compute_instance_v2.singlenet_k8s.*.id, openstack_compute_instance_v2.multinet_k8s.*.id)}"]

@@ -62,7 +62,9 @@ image_name=""
 
 if [ "$TARGET" == "coreos" ]; then
     image_name="CoreOS Stable K8s"
-elif [ "$TARGET" == "coreos" ]; then
+elif [ "$TARGET" == "ubuntu1604" ]; then
+    image_name="Ubuntu 16.04 K8s"
+elif [ "$TARGET" == "centos7" ]; then
     image_name="Centos 7 K8s"
 else
     echo "checking if image already built" >&2

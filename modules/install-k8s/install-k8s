@@ -12,8 +12,6 @@ readonly DEFAULT_K8S_VERSION="1.11.3"
 readonly DEFAULT_CALICO_NODE_VERSION="3.1.2"
 readonly DEFAULT_CALICO_CNI_VERSION="3.1.2"
 readonly DEFAULT_FLANNEL_VERSION="0.9.1"
-readonly DEFAULT_KUBEDNS_VERSION="1.14.11"
-readonly DEFAULT_PAUSE_VERSION="3.0"
 readonly DEFAULT_ETCD_VERSION="3.3.9"
 readonly DEFAULT_CRICTL_VERSION="1.11.1"
 readonly DEFAULT_K8S_CNI_PLUGINS_VERSION="0.7.1"
@@ -36,8 +34,6 @@ function print_usage {
   echo -e "  --calico-node-version\t\tThe version of Calico node docker image to install. Required."
   echo -e "  --calico-cni-version\t\tThe version of Calico CNI docker image to install. Required."
   echo -e "  --flannel-version\t\tThe version of Flannel docker image to install. Required."
-  echo -e "  --kubedns-version\t\tThe version of KubeDNS docker images to install. Required."
-  echo -e "  --pause-version\t\tThe version of pause docker image to install. Required."
   echo -e "  --cni-plugins-version\t\tThe version of cni plugins to install. Required."
   echo -e "  --sha1sum-cni-plugins\t\tThe sha1 checksum of the cni plugins release. Required."
   echo -e "  --sha1sum-kubelet\t\tThe sha1 checksum of the Kubernetes binary. Required."
@@ -86,9 +82,16 @@ function install_dependencies {
   if [ -n "$(command -v yum)" ]; then
       # curl to download or interact with apis,
       # docker to run kubernetes infra # Not tested
-      sudo yum install -y curl docker
+      sudo yum install -y docker
+  elif [ -n "$(command -v apt-get)" ] && [ -n "$(command -v ubuntu-bug)" ]; then
+      log_info "Ubuntu based. upgrading system and installing docker"
+      echo "Debian based. upgrading system." >&2
+      export DEBIAN_FRONTEND=noninteractive
+      sudo -E apt update -y -q
+      sudo -E apt install --no-install-recommends -q -y jq docker.io
+      sudo usermod -aG docker ubuntu
   elif [ -n "$(command -v coreos-install)" ]; then
-       log_info "Nothing to do for coreos"
+      log_info "Nothing to do for coreos"
   else
       log_error "Could not find yum. Cannot install dependencies on this OS."
       exit 1
@@ -198,36 +201,26 @@ function pull_needed_image(){
     local readonly calico_node_version="$2"
     local readonly calico_cni_version="$3"
     local readonly flannel_version="$4"
-    local readonly kubedns_version="$5"
-    local readonly pause_version="$6"
 
-    # docker pulls are silent to avoid log pollution in CI builds
+    # docker pull are silent to avoid log pollution in CI builds
 
     # Control plane
-    docker pull "gcr.io/google_containers/kube-apiserver-amd64:v${k8s_version}" >/dev/null 2>&1
-    docker pull "gcr.io/google_containers/kube-scheduler-amd64:v${k8s_version}"  >/dev/null 2>&1
-    docker pull "gcr.io/google_containers/kube-controller-manager-amd64:v${k8s_version}"  >/dev/null 2>&1
-    docker pull "gcr.io/google_containers/kube-proxy-amd64:v${k8s_version}" >/dev/null 2>&1
+    sudo /opt/k8s/bin/kubeadm config images pull --kubernetes-version "v${k8s_version}"
+
     # CNI
-    docker pull "quay.io/calico/node:v${calico_node_version}" >/dev/null 2>&1
-    docker pull "quay.io/calico/cni:v${calico_cni_version}" >/dev/null 2>&1
-    docker pull "quay.io/coreos/flannel:v${flannel_version}" >/dev/null 2>&1
-    # Warning fixed version
-    docker pull "gcr.io/google_containers/pause-amd64:${pause_version}" >/dev/null 2>&1
-    docker pull "gcr.io/google_containers/k8s-dns-sidecar-amd64:${kubedns_version}" >/dev/null 2>&1
-    docker pull "gcr.io/google_containers/k8s-dns-kube-dns-amd64:${kubedns_version}" >/dev/null 2>&1
-    docker pull "gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64:${kubedns_version}" >/dev/null 2>&1
+    sudo docker pull "quay.io/calico/node:v${calico_node_version}"
+    sudo docker pull "quay.io/calico/cni:v${calico_cni_version}"
+    sudo docker pull "quay.io/coreos/flannel:v${flannel_version}"
+
 }
 
 function setup_systemd {
     local readonly username="$1"
     sudo cp "$SCRIPT_DIR/kubelet.service" "/etc/systemd/system/"
-    sudo cp "$SCRIPT_DIR/kubelet.path" "/etc/systemd/system/"
     sudo cp "$SCRIPT_DIR/k8s-init.service" "/etc/systemd/system/"
     sudo cp "$SCRIPT_DIR/k8s-init.path" "/etc/systemd/system/"
-    sudo cp "$SCRIPT_DIR/k8s-get-certs.service" "/etc/systemd/system/"
 
-    sudo systemctl enable kubelet.path k8s-init.path docker.service
+    sudo systemctl enable kubelet.service k8s-init.path docker.service
 
     # disable firewalld. TODO: make a proper setup for etcd
     if systemctl list-unit-files --all | grep -q firewalld.service; then
@@ -247,8 +240,6 @@ function install {
   local calico_node_version=$DEFAULT_CALICO_NODE_VERSION
   local calico_cni_version=$DEFAULT_CALICO_CNI_VERSION
   local flannel_version=$DEFAULT_FLANNEL_VERSION
-  local kubedns_version=$DEFAULT_KUBEDNS_VERSION
-  local pause_version=$DEFAULT_PAUSE_VERSION
   local cni_plugins_version=$DEFAULT_K8S_CNI_PLUGINS_VERSION
   local sha1sum_cni_plugins=$DEFAULT_K8S_SHA1SUM_CNI_PLUGINS
   local sha1sum_kubelet=$DEFAULT_K8S_SHA1SUM_KUBELET
@@ -277,14 +268,6 @@ function install {
         ;;
       --flannel-version)
         flannel_version="$2"
-        shift
-        ;;
-      --kubedns-version)
-        kubedns_version="$2"
-        shift
-        ;;
-      --pause-version)
-        pause_version="$2"
         shift
         ;;
       --cni-plugins-version)
@@ -341,8 +324,6 @@ function install {
   assert_not_empty "--calico-node-version" "$calico_node_version"
   assert_not_empty "--calico-cni-version" "$calico_cni_version"
   assert_not_empty "--flannel-version" "$flannel_version"
-  assert_not_empty "--kubedns-version" "$kubedns_version"
-  assert_not_empty "--pause-version" "$pause_version"
   assert_not_empty "--cni-plugins-version" "$cni_plugins_version"
   assert_not_empty "--sha1sum-cni-plugins" "$sha1sum_cni_plugins"
   assert_not_empty "--sha1sum-kubectl" "$sha1sum_kubectl"
@@ -360,7 +341,7 @@ function install {
   install_etcdctl "$etcd_version" "$sha256sum_etcd" "$DEFAULT_INSTALL_PATH"
   install_crictl "$crictl_version" "$sha1sum_crictl" "$DEFAULT_INSTALL_PATH"
 
-  pull_needed_image "$k8s_version" "$calico_node_version" "$calico_cni_version" "$flannel_version" "$kubedns_version" "$pause_version"
+  pull_needed_image "$k8s_version" "$calico_node_version" "$calico_cni_version" "$flannel_version" > /dev/null 2>&1
   setup_systemd
 
   log_info "Kubernetes install complete!"
