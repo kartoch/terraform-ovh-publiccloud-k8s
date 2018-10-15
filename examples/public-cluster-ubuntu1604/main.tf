@@ -1,6 +1,6 @@
 provider "openstack" {
-  version   = "~> 1.5.0"
-  region    = "${var.region}"
+  version = "~> 1.5.0"
+  region  = "${var.region}"
 }
 
 data "http" "myip" {
@@ -20,12 +20,16 @@ module "k8s" {
   ssh_authorized_keys    = ["${file(var.public_sshkey == "" ? "/dev/null" : var.public_sshkey)}"]
   post_install_modules   = false
   image_name             = "Ubuntu 16.04 K8s"
-  image_tag              = "v0.2.0-12-g5ee1fd1"
   flavor_name            = "${var.flavor_name}"
   create_secgroups       = true
   ssh_user               = "ubuntu"
   associate_public_ipv4  = true
   associate_private_ipv4 = false
+
+  metadata = {
+    "control-plane" = "enabled"
+    "storage"       = "ssd"
+  }
 }
 
 resource "openstack_networking_secgroup_rule_v2" "in_traffic_k8s_sg" {
