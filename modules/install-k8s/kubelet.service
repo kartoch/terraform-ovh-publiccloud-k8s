@@ -19,6 +19,11 @@ Environment=CLIENT_CA_FILE=/etc/kubernetes/pki/ca.crt
 Environment=VOLUME_PLUGIN_DIR=/var/lib/kubelet/volumeplugins
 
 EnvironmentFile=/etc/sysconfig/kubernetes.conf
+EnvironmentFile=-/var/run/instance.metadata.conf
+EnvironmentFile=-/var/run/instance.type.conf
+
+ExecStartPre=-/bin/sh -c 'echo INSTANCE_METADATA=`curl -s -f http://169.254.169.254/openstack/latest/meta_data.json | jq -r \'.meta|to_entries|map([.key,.value]|join("="))|join(",")\'` | tee /var/run/instance.metadata.conf'
+ExecStartPre=-/bin/sh -c 'echo INSTANCE_TYPE=`curl -s -f http://169.254.169.254/latest/meta-data/instance-type` | tee /var/run/instance.type.conf'
 
 ExecStart=/opt/k8s/bin/kubelet \
   --address=${KUBELET_ADDRESS} \
@@ -34,6 +39,7 @@ ExecStart=/opt/k8s/bin/kubelet \
   --authorization-mode=${AUTH_MODE} \
   --client-ca-file=${CLIENT_CA_FILE} \
   --volume-plugin-dir=${VOLUME_PLUGIN_DIR} \
+  --node-labels=instance-type=${INSTANCE_TYPE},${INSTANCE_METADATA} \
   --rotate-certificates=true
 
 Restart=always
