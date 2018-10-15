@@ -41,7 +41,7 @@ variable "image_name" {
 
 variable "image_tag" {
   description = "The version of the prebuilt glance image to run in the cluster."
-  default     = "latest"
+  default     = ""
 }
 
 variable "image_version" {
