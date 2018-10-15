@@ -116,7 +116,7 @@ ssh_authorized_keys:
 write_files:
   ${var.master_mode && var.cfssl && var.cfssl_endpoint == "" && count.index == 0 ? indent(2, element(data.template_file.cfssl_files.*.rendered, count.index)) : ""}
   ${var.master_mode && var.etcd ? indent(2, element(data.template_file.etcd_conf.*.rendered, count.index)) : ""}
-  ${var.worker_mode ? indent(2, data.template_file.modprobe.rendered) : ""}
+  ${indent(2, data.template_file.modprobe.rendered)}
   ${indent(2, data.template_file.kubernetes_conf.rendered)}
   ${indent(2, data.template_file.systemd_network_files.rendered)}
   ${indent(2, data.template_file.systemd_resolved_file.rendered)}
