@@ -22,7 +22,13 @@ EnvironmentFile=/etc/sysconfig/kubernetes.conf
 EnvironmentFile=-/var/run/instance.metadata.conf
 EnvironmentFile=-/var/run/instance.type.conf
 
+# Disable swap
+ExecStartPre=-/sbin/swapoff -a
+
+# Retrieves instance metadata to inject as k8s nodes labels
 ExecStartPre=-/bin/sh -c 'echo INSTANCE_METADATA=`curl -s -f http://169.254.169.254/openstack/latest/meta_data.json | jq -r \'.meta|to_entries|map([.key,.value]|join("="))|join(",")\'` | tee /var/run/instance.metadata.conf'
+
+# Retrieve instance type from instance aws-like metadata to inject as a k8s node label
 ExecStartPre=-/bin/sh -c 'echo INSTANCE_TYPE=`curl -s -f http://169.254.169.254/latest/meta-data/instance-type` | tee /var/run/instance.type.conf'
 
 ExecStart=/opt/k8s/bin/kubelet \
