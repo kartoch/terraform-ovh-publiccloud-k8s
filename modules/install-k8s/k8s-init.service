@@ -16,6 +16,7 @@ Environment=ETCD_CERT_FILE=/etc/kubernetes/etcd/client.crt
 Environment=ETCD_KEY_FILE=/etc/kubernetes/etcd/client.key
 Environment=API_ENDPOINT=
 Environment=CACRT_ETCD_KEY=k8s/cacrt
+Environment=CACRT_SHASUM_ETCD_KEY=k8s/cacrt-sha256
 Environment=BOOTSTRAP_TOKEN_ETCD_KEY=k8s/boostrap-token
 Environment=PKI_ETCD_KEY=k8s/pki
 Environment=MASTERS_ETCD_KEYPREFIX=k8s/masters
