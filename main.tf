@@ -4,8 +4,8 @@ terraform {
 }
 
 locals {
-  image_filter_key =  "${var.image_version != "" ? "version" : (var.image_tag != "" ? "tag" : "")}"
-  image_filter_value =  "${var.image_version != "" ? var.image_version : var.image_tag}"
+  image_filter_key   = "${var.image_version != "" ? "version" : (var.image_tag != "" ? "tag" : "")}"
+  image_filter_value = "${var.image_version != "" ? var.image_version : var.image_tag}"
 }
 
 data "openstack_images_image_v2" "k8s" {
@@ -117,7 +117,11 @@ module "userdata" {
   cfssl_key_size      = "${var.cfssl_key_size}"
   cfssl_bind          = "${var.cfssl_bind}"
   cfssl_port          = "${var.cfssl_port}"
-  api_endpoint        = "${var.api_endpoint}"
+
+  # k8s variables to join existing cluster
+  api_endpoint    = "${var.api_endpoint}"
+  bootstrap_token = "${var.bootstrap_token}"
+  cacrt_sha256sum = "${var.cacrt_sha256sum}"
 
   worker_mode = "${var.worker_mode}"
 }

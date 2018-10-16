@@ -42,7 +42,7 @@ data "template_file" "k8s_vars" {
   template = <<TPL
 ETCD_ENDPOINTS=${join(",", compact(list(var.etcd_endpoints, (var.etcd? module.etcd.etcd_endpoints: ""))))}
 API_ENDPOINT=${var.api_endpoint}
-CFSSL_ENDPOINT=${var.cfssl_endpoint == "" ? module.cfssl.endpoint : var.cfssl_endpoint}
+CFSSL_ENDPOINT=${var.cfssl ? (var.cfssl_endpoint == "" ? module.cfssl.endpoint : var.cfssl_endpoint) : "" }
 CLUSTER_DNS=${local.cluster_dns}
 CLUSTER_DOMAIN=${var.domain}
 UPSTREAM_RESOLVER=${var.upstream_resolver}
@@ -53,5 +53,7 @@ MASTER_MODE=${var.master_mode}
 WORKER_MODE=${var.worker_mode}
 KUBEPROXY_CONFIG_MODE=iptables
 AUTHORIZATION_MODES=Node,RBAC
+BOOTSTRAP_TOKEN=${var.bootstrap_token}
+CACRT_SHA256SUM=${var.cacrt_sha256sum}
 TPL
 }
