@@ -41,7 +41,7 @@ variable "image_name" {
 
 variable "image_tag" {
   description = "The version of the prebuilt glance image to run in the cluster."
-  default     = "latest"
+  default     = ""
 }
 
 variable "image_version" {
@@ -285,5 +285,15 @@ variable "worker_mode" {
 
 variable "api_endpoint" {
   description = "Kubernetes API endpoint (single IP or hostname) with port"
+  default     = ""
+}
+
+variable "bootstrap_token" {
+  description = "Kubernetes bootstrap token. (useful for worker nodes to join existing cluster)"
+  default     = ""
+}
+
+variable "cacrt_sha256sum" {
+  description = "Kubernetes cacrt sha256sum. (useful for worker nodes to join existing cluster)"
   default     = ""
 }

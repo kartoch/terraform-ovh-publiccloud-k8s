@@ -41,20 +41,20 @@ function get_etcd_cert(){
 }
 
 if [ -z "$CFSSL_ENDPOINT" ]; then
-    log user.info "no cfssl endpoint set. cannot get certs. nothing to do"
+    echo "no cfssl endpoint set. cannot get certs. nothing to do" >&2
     exit 0
 fi
 
 if [ -z "$ETCD_CA_FILE" ]; then
-    log user.info "ETCD_CA_FILE env var not set. nothing to do"
+    echo "ETCD_CA_FILE env var not set. nothing to do" >&2
     exit 0
 fi
 if [ -z "$ETCD_CERT_FILE" ]; then
-    log user.info "ETCD_CERT_FILE env var not set. nothing to do"
+    echo "ETCD_CERT_FILE env var not set. nothing to do" >&2
     exit 0
 fi
 if [ -z "$ETCD_KEY_FILE" ]; then
-    log user.info "ETCD_KEY_FILE env var not set. nothing to do"
+    echo "ETCD_KEY_FILE env var not set. nothing to do" >&2
     exit 0
 fi
 

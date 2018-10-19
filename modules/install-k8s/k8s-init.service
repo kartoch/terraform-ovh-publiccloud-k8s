@@ -15,11 +15,19 @@ Environment=ETCD_CA_FILE=/etc/kubernetes/etcd/ca.crt
 Environment=ETCD_CERT_FILE=/etc/kubernetes/etcd/client.crt
 Environment=ETCD_KEY_FILE=/etc/kubernetes/etcd/client.key
 Environment=API_ENDPOINT=
-Environment=DISCOVERY_CA_TOKEN_ETCD_KEY=k8s/admin/discovery-ca-token
-Environment=BOOTSTRAP_TOKEN_ETCD_KEY=k8s/admin/boostrap-token
-Environment=PKI_ETCD_KEY=k8s/admin/pki
+Environment=BOOTSTRAP_TOKEN=
+Environment=CACRT_SHA256SUM=
+Environment=CACRT_ETCD_KEY=k8s/cacrt
+Environment=CACRT_SHA256SUM_ETCD_KEY=k8s/cacrt-sha256
+Environment=BOOTSTRAP_TOKEN_ETCD_KEY=k8s/bootstrap-token
+Environment=PKI_ETCD_KEY=k8s/pki
 Environment=MASTERS_ETCD_KEYPREFIX=k8s/masters
-Environment=INIT_ETCD_LOCK=k8s/admin/k8s-init-lock
+Environment=INIT_ETCD_LOCK=k8s/k8s-init-lock
+Environment=K8S_ADMIN_SA_USERNAME=admin
+Environment=K8S_ADMIN_SA_USERNAME_ETCD_KEY=k8s/admin/sa-name
+Environment=K8S_ADMIN_SA_USER_TOKEN_ETCD_KEY=k8s/admin/user-token
+Environment=K8S_ADMIN_SA_ENDPOINT_ETCD_KEY=k8s/admin/endpoint
+Environment=K8S_ADMIN_SA_CLUSTER_NAME_ETCD_KEY=k8s/admin/cluster-name
 
 Environment=POD_MANIFEST_PATH=/etc/kubernetes/manifests
 Environment=CLUSTER_DOMAIN=cluster.local

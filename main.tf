@@ -3,12 +3,17 @@ terraform {
   required_version = ">= 0.10.4"
 }
 
+locals {
+  image_filter_key   = "${var.image_version != "" ? "version" : (var.image_tag != "" ? "tag" : "")}"
+  image_filter_value = "${var.image_version != "" ? var.image_version : var.image_tag}"
+}
+
 data "openstack_images_image_v2" "k8s" {
   count       = "${var.image_id == "" ? 1 : 0}"
   name        = "${var.image_name}"
   most_recent = true
 
-  properties = "${map((var.image_version != "" ? "version" : "tag"), (var.image_version != "" ? var.image_version : var.image_tag))}"
+  properties = "${zipmap(compact(list(local.image_filter_key)), compact(list(local.image_filter_value)))}"
 }
 
 data "openstack_networking_subnet_v2" "subnets" {
@@ -112,7 +117,11 @@ module "userdata" {
   cfssl_key_size      = "${var.cfssl_key_size}"
   cfssl_bind          = "${var.cfssl_bind}"
   cfssl_port          = "${var.cfssl_port}"
-  api_endpoint        = "${var.api_endpoint}"
+
+  # k8s variables to join existing cluster
+  api_endpoint    = "${var.api_endpoint}"
+  bootstrap_token = "${var.bootstrap_token}"
+  cacrt_sha256sum = "${var.cacrt_sha256sum}"
 
   worker_mode = "${var.worker_mode}"
 }
