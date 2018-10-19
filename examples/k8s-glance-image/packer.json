@@ -8,6 +8,7 @@
         "module_etcd_version": "0.1.5",
         "module_etcd_sha256sum": "d362875d84de39ad6a61a886c82ddea425e51ff84a9b401433c673d89e52e818",
         "ext_net_id": "",
+        "flavor_name": "s1-4",
         "tag": "latest",
         "image_name": "",
         "commit": ""
@@ -22,7 +23,7 @@
             "image_name": "{{user `image_name`}}",
             "source_image_name": "CoreOS Stable",
             "ssh_ip_version": "4",
-            "flavor": "s1-2",
+            "flavor": "{{user `flavor_name`}}",
             "networks": [
                 "{{user `ext_net_id`}}"
             ],
@@ -41,7 +42,7 @@
             "image_name": "{{user `image_name`}}",
             "source_image_name": "Centos 7",
             "ssh_ip_version": "4",
-            "flavor": "s1-2",
+            "flavor": "{{user `flavor_name`}}",
             "networks": [
                 "{{user `ext_net_id`}}"
             ],
@@ -60,7 +61,7 @@
             "image_name": "{{user `image_name`}}",
             "source_image_name": "Ubuntu 16.04",
             "ssh_ip_version": "4",
-            "flavor": "s1-2",
+            "flavor": "{{user `flavor_name`}}",
             "networks": [
                 "{{user `ext_net_id`}}"
             ],
