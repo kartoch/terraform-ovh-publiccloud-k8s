@@ -220,24 +220,23 @@ function setup_systemd {
     local readonly username="$1"
     sudo cp "$SCRIPT_DIR/kubelet.service" "/etc/systemd/system/"
     sudo cp "$SCRIPT_DIR/k8s-init.service" "/etc/systemd/system/"
-    sudo cp "$SCRIPT_DIR/k8s-init.path" "/etc/systemd/system/"
+    sudo cp "$SCRIPT_DIR/k8s.target" "/etc/systemd/system/"
+    sudo cp "$SCRIPT_DIR/00-dhcp.network" "/etc/systemd/network/"
 
-    if [ -n "$(command -v yum)" ]; then
-        # setup systemd networking
-        sudo systemctl disable network
-        sudo systemctl disable NetworkManager
-        sudo systemctl start systemd-resolved
-        sudo rm -f /etc/resolv.conf
-        sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
-    elif [ -n "$(command -v apt-get)" ] && [ -n "$(command -v ubuntu-bug)" ]; then
-        # setup systemd networking
+    if systemctl list-unit-files --all | grep -q networking.service; then
         sudo systemctl disable networking
-        sudo systemctl start systemd-resolved
-        sudo rm -f /etc/resolv.conf
-        sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+        sudo systemctl mask networking ifup@ens3.service ifup@eth0.service
+    fi
+    if systemctl list-unit-files --all | grep -q network.service; then
+        sudo systemctl disable network NetworkManager
+        sudo systemctl mask network NetworkManager
     fi
 
-    sudo systemctl enable kubelet.service k8s-init.path docker.service systemd-resolved systemd-networkd
+    sudo systemctl start systemd-resolved
+    sudo rm -f /etc/resolv.conf
+    sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+
+    sudo systemctl enable k8s.target kubelet.service k8s-init.service docker.service systemd-resolved systemd-networkd
 
     # disable firewalld. TODO: make a proper setup for etcd
     if systemctl list-unit-files --all | grep -q firewalld.service; then
