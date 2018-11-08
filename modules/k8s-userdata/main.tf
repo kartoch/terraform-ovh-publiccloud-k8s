@@ -5,7 +5,7 @@ locals {
 
 module "cfssl" {
   source  = "ovh/publiccloud-cfssl/ovh//modules/cfssl-userdata"
-  version = ">= 0.1.3"
+  version = ">= 0.1.11"
 
   cidr                 = "${var.host_cidr}"
   ssh_authorized_keys  = ["${var.ssh_authorized_keys}"]
@@ -26,7 +26,7 @@ module "cfssl" {
 
 module "etcd" {
   source               = "ovh/publiccloud-etcd/ovh//modules/etcd-userdata"
-  version              = "0.1.2"
+  version              = "0.1.7"
   count                = "${var.count}"
   name                 = "${var.name}"
   domain               = "${var.domain}"
