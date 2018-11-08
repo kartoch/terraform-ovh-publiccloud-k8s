@@ -1,8 +1,10 @@
 [Unit]
 Description=Bootstrap a Kubernetes cluster with kubeadm
 Wants=etcd.service 
-After=etcd.service network-online.target cloud-init.target
+After=etcd.service network-online.target
 ConditionPathExists=!/opt/k8s/init.done
+After=%AFTER%
+Wants=%WANTS%
 
 [Service]  
 Restart=on-failure
@@ -43,6 +45,3 @@ EnvironmentFile=/etc/sysconfig/kubernetes.conf
 
 ExecStartPre=/opt/k8s/k8s-get-certs
 ExecStart=/opt/k8s/k8s-init
-
-[Install]
-WantedBy=k8s.target

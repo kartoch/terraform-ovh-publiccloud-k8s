@@ -123,6 +123,6 @@ write_files:
 # ensures networking config & k8s-init is taken into account at first boot
 # once files are written
 runcmd:
-  - systemctl reload-or-restart systemd-networkd systemd-resolved k8s-init.service
+  - systemctl reload-or-restart systemd-networkd systemd-resolved
 CLOUDCONFIG
 }
