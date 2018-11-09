@@ -15,7 +15,7 @@ variable "name" {
 
 variable "domain" {
   description = "The domain of the cluster."
-  default     = "local"
+  default     = "cluster.local"
 }
 
 variable "datacenter" {
@@ -28,8 +28,14 @@ variable "k8s_version" {
   default     = ""
 }
 
-variable "ipv4_addrs" {
-  description = "list of nodes ipv4 addrs. Required if `master_mode` is true."
+variable "public_ipv4_addrs" {
+  description = "list of nodes public ipv4 addrs. one of public or private is required if `master_mode` is true."
+  type        = "list"
+  default     = []
+}
+
+variable "private_ipv4_addrs" {
+  description = "list of nodes private ipv4 addrs. one of public or private is required if `master_mode` is true."
   type        = "list"
   default     = []
 }

@@ -9,7 +9,7 @@ module "cfssl" {
 
   cidr                 = "${var.host_cidr}"
   ssh_authorized_keys  = ["${var.ssh_authorized_keys}"]
-  ipv4_addr            = "${element(var.ipv4_addrs,0)}"
+  ipv4_addr            = "${element(coalescelist(var.private_ipv4_addrs,var.public_ipv4_addrs),0)}"
   cacert               = "${var.cacert}"
   cacert_key           = "${var.cacert_key}"
   ca_validity_period   = "${var.cfssl_ca_validity_period}"
@@ -35,7 +35,7 @@ module "etcd" {
   cfssl                = "${var.cfssl}"
   cfssl_endpoint       = "${var.cfssl_endpoint == "" ? module.cfssl.endpoint : var.cfssl_endpoint}"
   etcd_initial_cluster = "${var.etcd_initial_cluster}"
-  ipv4_addrs           = ["${var.ipv4_addrs}"]
+  ipv4_addrs           = ["${coalescelist(var.private_ipv4_addrs, var.public_ipv4_addrs)}"]
 }
 
 data "template_file" "k8s_vars" {
@@ -48,7 +48,7 @@ CLUSTER_DOMAIN=${var.domain}
 UPSTREAM_RESOLVER=${var.upstream_resolver}
 NETWORKING_SERVICE_SUBNET=${var.service_cidr}
 NETWORKING_POD_SUBNET=${var.pod_cidr}
-API_SERVER_CERT_SANS=${join(",", var.ipv4_addrs)}
+API_SERVER_CERT_SANS=${join(",", concat(var.private_ipv4_addrs,var.public_ipv4_addrs))}
 MASTER_MODE=${var.master_mode}
 WORKER_MODE=${var.worker_mode}
 KUBEPROXY_CONFIG_MODE=iptables
