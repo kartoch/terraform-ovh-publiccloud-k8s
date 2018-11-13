@@ -105,8 +105,8 @@ function create_k8s_install_paths {
   sudo mkdir -p "$path/bin"
   sudo echo "export PATH=\$PATH:$path/bin"  | sudo tee /etc/profile.d/k8s_path.sh > /dev/null
   sudo chmod +x /etc/profile.d/k8s_path.sh
-  sudo cp $SCRIPT_DIR/{k8s-init,k8s-get-certs,kubeadm-init,kubeadm_config.yaml.sh,cni-manifest.yaml.sh,coredns-manifest.yaml.sh} "$path"
-  sudo chmod +x "$path"/{k8s-init,k8s-get-certs,kubeadm-init,kubeadm_config.yaml.sh,cni-manifest.yaml.sh,coredns-manifest.yaml.sh}
+  sudo cp $SCRIPT_DIR/{k8s-init,k8s-get-certs,kubeadm-init,kubeadm_config.yaml.sh,cni-manifest.yaml.sh} "$path"
+  sudo chmod +x "$path"/{k8s-init,k8s-get-certs,kubeadm-init,kubeadm_config.yaml.sh,cni-manifest.yaml.sh}
 }
 
 function check_sha1sum {

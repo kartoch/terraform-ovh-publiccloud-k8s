@@ -37,9 +37,6 @@ if [ "$MASTER_MODE" == "1" ]; then
         /opt/k8s/bin/kubectl --kubeconfig=/etc/kubernetes/admin.conf taint nodes $(hostname) node-role.kubernetes.io/master-
     fi
 
-    # generate coredns config
-    /opt/k8s/coredns-manifest.yaml.sh > /etc/kubernetes/manifests/coredns-manifest.yaml
-
     # generate cni config
     if [ ! -d /etc/kubernetes/cni ]; then
         mkdir -p /etc/kubernetes/cni
