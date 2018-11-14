@@ -1,5 +1,6 @@
 #!/bin/bash
-# This script can be used to install Kubernetes and its dependencies. This script has been tested with the CentOS 7 operating system.
+# This script can be used to install Kubernetes binaries and its dependencies.
+# This script has been tested with the CentOS 7/CoreOS/Ubuntu operating systems.
 set -e
 
 readonly DEFAULT_INSTALL_PATH="/opt/k8s"
@@ -81,14 +82,23 @@ function install_dependencies {
   if [ -n "$(command -v yum)" ]; then
       # curl to download or interact with apis,
       # docker to run kubernetes infra # Not tested
-      sudo yum install -y docker socat systemd-networkd systemd-resolved
+      sudo yum install -y \
+           docker \
+           socat \
+           systemd-networkd \
+           systemd-resolved \
+           ebtables
       sudo usermod -aG docker centos
   elif [ -n "$(command -v apt-get)" ] && [ -n "$(command -v ubuntu-bug)" ]; then
       log_info "Ubuntu based. upgrading system and installing docker"
       echo "Debian based. upgrading system." >&2
       export DEBIAN_FRONTEND=noninteractive
       sudo -E apt update -y -q
-      sudo -E apt install --no-install-recommends -q -y jq docker.io socat
+      sudo -E apt install --no-install-recommends -q -y \
+           jq \
+           docker.io \
+           socat \
+           ebtables
       sudo usermod -aG docker ubuntu
   elif [ -n "$(command -v coreos-install)" ]; then
       log_info "Nothing to do for coreos"
@@ -105,8 +115,16 @@ function create_k8s_install_paths {
   sudo mkdir -p "$path/bin"
   sudo echo "export PATH=\$PATH:$path/bin"  | sudo tee /etc/profile.d/k8s_path.sh > /dev/null
   sudo chmod +x /etc/profile.d/k8s_path.sh
-  sudo cp $SCRIPT_DIR/{k8s-init,k8s-get-certs,kubeadm-init,kubeadm_config.yaml.sh,cni-manifest.yaml.sh} "$path"
-  sudo chmod +x "$path"/{k8s-init,k8s-get-certs,kubeadm-init,kubeadm_config.yaml.sh,cni-manifest.yaml.sh}
+  for i in kubeadm-init \
+               kubeadm-init-lock \
+               postsetup \
+               postsetup-lock \
+               etcd-get-certs \
+               kubeadm_config.yaml.sh \
+               cni-manifest.yaml.sh; do
+      sudo cp "$SCRIPT_DIR/${i}" "$path/bin"
+      sudo chmod +x "$path/bin/${i}"
+  done
 }
 
 function check_sha1sum {
@@ -240,13 +258,15 @@ function setup_systemd {
 
     if [ -n "$(command -v apt-get)" ] && [ -n "$(command -v ubuntu-bug)" ]; then
         sudo sed -i -e s/%AFTER%/cloud-init.target/g "/etc/systemd/system/k8s-init.service"
-        sudo sed -i -e s/%WANTS%/cloud-init.target/g "/etc/systemd/system/k8s-init.service"
-        sudo systemctl add-wants cloud-init.target kubelet.service
+        sudo sed -i -e s/%WANTS%/cloud-init.target/g "/etc/systemd/system/kubelet.service"
+        sudo systemctl add-wants cloud-init.target k8s-init.service
     else
         sudo sed -i -e s/%AFTER%/multi-user.target/g "/etc/systemd/system/k8s-init.service"
-        sudo sed -i -e s/%WANTS%/multi-user.target/g "/etc/systemd/system/k8s-init.service"
-        sudo systemctl add-wants multi-user.target kubelet.service
+        sudo sed -i -e s/%WANTS%/cloud-init.target/g "/etc/systemd/system/kubelet.service"
+        sudo systemctl add-wants multi-user.target k8s-init.service
     fi
+
+    sudo systemctl enable kubelet.service
 
     # disable firewalld. TODO: make a proper setup for etcd
     if systemctl list-unit-files --all | grep -q firewalld.service; then

@@ -1,8 +1,8 @@
 [Unit]
 Description=kubelet: The Kubernetes Node Agent
 Documentation=http://kubernetes.io/docs/
-Requires=docker.service k8s-init.service
-After=docker.service k8s-init.service
+Requires=docker.service
+After=docker.service
 
 [Service]
 Environment=PATH=/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -51,3 +51,6 @@ ExecStart=/opt/k8s/bin/kubelet \
 Restart=always
 StartLimitInterval=0
 RestartSec=10
+
+[Install]
+WantedBy=%WANTS%

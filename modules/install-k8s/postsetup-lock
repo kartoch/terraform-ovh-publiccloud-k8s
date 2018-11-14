@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# k8s-postsetup-lock runs all necessary kubectl commands to prepare
+# the master nodes once kubeadm init/join is done.
+# This script has to be run only once by only one master.
+# ETCD lock system can be used for that purpose
+# - apply the CNI
+# - setup admin account
+# - register information into ETCD
+
+set -eo pipefail
+
+# Prepare etcdctl command
+export ETCDCTL_API=3
+ETCDCTL_COMMAND="/opt/k8s/bin/etcdctl --cacert $ETCD_CA_FILE --cert $ETCD_CERT_FILE --key $ETCD_KEY_FILE --endpoints $ETCD_ENDPOINTS"
+KUBECTL="/opt/k8s/bin/kubectl --kubeconfig /etc/kubernetes/admin.conf"
+
+if DONE=$($ETCDCTL_COMMAND get --print-value-only $K8S_POSTSETUP_DONE_ETCD_KEY) && [ ! -z "$DONE" ]; then
+    echo "postsetup kubernetes already done by $DONE" >&2
+    exit 0
+fi
+
+if [ ! -f /etc/kubernetes/pki/ca.crt ]; then
+   echo "cacrt not present. This is a Bug" >&2
+   exit 1
+fi
+
+echo "Putting cacrt into etcd." >&2
+$ETCDCTL_COMMAND put "$CACRT_ETCD_KEY" "$(cat /etc/kubernetes/pki/ca.crt | base64)"
+
+echo "Setting admin user credentials in etcd" >&2
+user=${K8S_ADMIN_SA_USERNAME}
+$KUBECTL create sa "${user}"
+secret=$($KUBECTL get sa "${user}" -o json | jq -r '.secrets[].name')
+user_token=$($KUBECTL get secret "${secret}" -o json | jq -r '.data["token"]' | base64 -d)
+c=$($KUBECTL config current-context)
+cluster_name=$($KUBECTL config get-contexts $c | awk '{print $3}' | tail -n 1)
+endpoint=$($KUBECTL config view -o jsonpath="{.clusters[?(@.name == \"${cluster_name}\")].cluster.server}")
+echo "Grant cluster admin role to ${user}" >&2
+$KUBECTL create clusterrolebinding "${user}-cluster-admin-binding" --clusterrole=cluster-admin --user="system:serviceaccount:default:${user}"
+
+echo "Putting admin sa username into etcd." >&2
+$ETCDCTL_COMMAND put "$K8S_ADMIN_SA_USERNAME_ETCD_KEY" "${user}"
+echo "Putting admin sa token username into etcd." >&2
+$ETCDCTL_COMMAND put "$K8S_ADMIN_SA_USER_TOKEN_ETCD_KEY" "${user_token}"
+echo "Putting admin sa cluster name into etcd." >&2
+$ETCDCTL_COMMAND put "$K8S_ADMIN_SA_CLUSTER_NAME_ETCD_KEY" "${cluster_name}"
+echo "Putting admin sa endpoint into etcd." >&2
+$ETCDCTL_COMMAND put "$K8S_ADMIN_SA_ENDPOINT_ETCD_KEY" "${endpoint}"
+
+tmpcnimanifest=$(mktemp)
+trap "rm -f $tmpcnimanifest" EXIT
+
+if ! /opt/k8s/bin/cni-manifest.yaml.sh > $tmpcnimanifest; then
+    echo "Failed to gen cni manifest file. This is a Bug" >&2
+    exit 1
+fi
+
+echo "Apply CNI manifests" >&2
+if ! $KUBECTL apply -f $tmpcnimanifest; then
+    echo "Failed to apply CNI" >&2
+    exit 1
+fi
+
+echo "Putting post setup done by $(hostname) in etcd." >&2
+if ! $ETCDCTL_COMMAND put $K8S_POSTSETUP_DONE_ETCD_KEY "$(hostname)"; then
+    echo "Failed to register setup done in ETCD" >&2
+    exit 1
+fi

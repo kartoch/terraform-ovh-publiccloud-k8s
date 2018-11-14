@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# k8s-postsetup runs all necessary kubectl commands to prepare
+# the master nodes once kubeadm init/join is done.
+# - untaint master if its a worker node
+# - register master into ETCD
+# - runs k8s-postsetup-lock with an ETCD lock
+
+set -eo pipefail
+
+if [ "$MASTER_MODE" != "1" ]; then
+    echo "nothing to be done" >&2
+    exit 0
+fi
+
+# Do not run if init has already been done
+if [ -f /opt/k8s/init.done ]; then
+    echo "init already done. This is a bug" >&2
+    exit 1
+fi
+
+# Do not run if kubeadm-init hasn't been done
+if [ ! -f /opt/k8s/kubeadm-init.done ]; then
+    echo "kubeadm-init not done." >&2
+    exit 1
+fi
+
+# Prepare etcdctl command
+export ETCDCTL_API=3
+ETCDCTL_COMMAND="/opt/k8s/bin/etcdctl --cacert $ETCD_CA_FILE --cert $ETCD_CERT_FILE --key $ETCD_KEY_FILE --endpoints $ETCD_ENDPOINTS"
+KUBECTL="/opt/bin/kubectl --kubeconfig /etc/kubernetes/admin.conf"
+
+function pubipaddr(){
+    if ip route get 1.1.1.1 > /dev/null 2>&1; then
+        ip -o route get 1.1.1.1 | sed 's/.*src \([0-9\.]*\) .*/\1/g'
+    else
+        return 1
+    fi
+}
+
+echo "postsetup kubernetes" >&2
+if ! $KUBECTL cluster-info; then
+    echo "kubernetes not ready" >&2
+    exit 1
+fi
+
+# Untaint node if needed
+if [ "$WORKER_MODE" == "1" ]; then
+  echo "untainting $(hostname) master node" >&2
+  $KUBECTL taint nodes $(hostname) node-role.kubernetes.io/master-
+fi
+
+echo "Registering master into etcd." >&2
+if ip=$(pubipaddr); then
+  $ETCDCTL_COMMAND put "${MASTERS_ETCD_KEYPREFIX}/$(hostname)" "$ip"
+else
+  echo "WARNING: Couldn't get ip addr & register master node." >&2
+fi
+
+if [ -z "$POSTSETUP_ETCD_LOCK" ]; then
+    echo "lock var is undefined. cannot proceed. This is a Bug." >&2
+    exit 1
+fi
+
+echo "acquiring lock $POSTSETUP_ETCD_LOCK" >&2
+$ETCDCTL_COMMAND lock "$POSTSETUP_ETCD_LOCK" /opt/k8s/bin/postsetup-lock
+echo "kubernetes postsetup done" >&2

@@ -1,7 +1,13 @@
 #!/bin/bash
-set +x
+function pubipaddr(){
+    if ip route get 1.1.1.1 > /dev/null 2>&1; then
+        ip -o route get 1.1.1.1 | sed 's/.*src \([0-9\.]*\) .*/\1/g'
+    else
+        return 1
+    fi
+}
 
-CONTROL_PLANE_ENDPOINT=$1
+CONTROL_PLANE_ENDPOINT="${API_ENDPOINT:-$(pubipaddr):6443}"
 
 cat <<EOF
 apiVersion: kubeadm.k8s.io/v1alpha3
