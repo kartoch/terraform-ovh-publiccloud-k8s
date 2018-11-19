@@ -25,6 +25,7 @@ export PATH=$PATH:/opt/k8s/bin
 echo "Cleanup kubeadm files from a previous init" >&2
 for i in "${POD_MANIFEST_PATH}" \
              /etc/kubernetes/kubelet.conf \
+             /etc/kubernetes/pki \
              /etc/kubernetes/bootstrap-kubelet.conf; do
     if [ -f "$i" ] || [ -d "$i" ]; then
         mv -v -- "${i}" "${i}.bak"

@@ -12,7 +12,7 @@ Environment=KUBELET_CONFIG=/etc/kubernetes/kubelet.conf
 Environment=POD_MANIFEST_PATH=/etc/kubernetes/manifests
 Environment=CNI_CONF_DIR=/etc/cni/net.d
 Environment=CNI_BIN_DIR=/opt/cni/bin
-Environment=CLUSTER_DNS=10.3.0.10
+Environment=CLUSTER_DNS=192.168.0.10
 Environment=CLUSTER_DOMAIN=cluster.local
 Environment=AUTH_MODE=Webhook
 Environment=CLIENT_CA_FILE=/etc/kubernetes/pki/ca.crt

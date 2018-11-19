@@ -8,19 +8,19 @@ readonly DEFAULT_INSTALL_PATH="/opt/k8s"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_NAME="$(basename "$0")"
 
-readonly DEFAULT_K8S_VERSION="1.12.0"
-readonly DEFAULT_CALICO_NODE_VERSION="3.1.2"
-readonly DEFAULT_CALICO_CNI_VERSION="3.1.2"
+readonly DEFAULT_K8S_VERSION="1.12.2"
+readonly DEFAULT_CALICO_NODE_VERSION="3.3.1"
+readonly DEFAULT_CALICO_CNI_VERSION="3.3.1"
 readonly DEFAULT_FLANNEL_VERSION="0.9.1"
 readonly DEFAULT_ETCD_VERSION="3.3.9"
-readonly DEFAULT_CRICTL_VERSION="1.11.1"
+readonly DEFAULT_CRICTL_VERSION="1.12.0"
 readonly DEFAULT_K8S_CNI_PLUGINS_VERSION="0.7.1"
 readonly DEFAULT_K8S_SHA1SUM_CNI_PLUGINS="fb29e20401d3e9598a1d8e8d7992970a36de5e05"
-readonly DEFAULT_K8S_SHA1SUM_KUBELET="2948b9afd0e8e3181d18b83f87533afd6e5f4970"
-readonly DEFAULT_K8S_SHA1SUM_KUBECTL="85904f6caa295eaeef10e1b59a5e9f823e7b4825"
-readonly DEFAULT_K8S_SHA1SUM_KUBEADM="ec4f55d51b72e481d29f9cf8bc96f6c441976a53"
+readonly DEFAULT_K8S_SHA1SUM_KUBELET="a82ca0bb1c7d838ec83070f92ddda9671ee02f90"
+readonly DEFAULT_K8S_SHA1SUM_KUBECTL="8e94e8bafdcd919a183143d6f3364b75278e277d"
+readonly DEFAULT_K8S_SHA1SUM_KUBEADM="8eb38063068f9f19a372333c0c03041ea1396e50"
 readonly DEFAULT_SHA256SUM_ETCD="7b95bdc6dfd1d805f650ea8f886fdae6e7322f886a8e9d1b0d14603767d053b1"
-readonly DEFAULT_SHA1SUM_CRICTL="767cb6e6ab5a9202d851950743a500a09d08faf5"
+readonly DEFAULT_SHA1SUM_CRICTL="45a9c65cc52a13e76e07fbc64ddcf3b646cd8c82"
 
 function print_usage {
   echo
@@ -129,7 +129,7 @@ function create_k8s_install_paths {
 
 function check_sha1sum {
   local readonly path="$1"
-  local readonly sha1sum="$2"
+  local readonly "sha1sum"="$2"
   local readonly computed_sha1sum=$(sha1sum "$path" | awk '{print $1}')
 
   if [ "$sha1sum" != "$computed_sha1sum" ]; then

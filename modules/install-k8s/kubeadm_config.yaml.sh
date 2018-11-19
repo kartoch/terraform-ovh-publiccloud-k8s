@@ -29,8 +29,8 @@ kubeProxy:
     mode: ${KUBEPROXY_CONFIG_MODE:-iptables}
 networking:
   dnsDomain: ${CLUSTER_DOMAIN:-cluster.local}
-  serviceSubnet: ${NETWORKING_SERVICE_SUBNET:-10.3.0.0/16}
-  podSubnet: ${NETWORKING_POD_SUBNET:-10.2.0.0/16}
+  serviceSubnet: ${NETWORKING_SERVICE_SUBNET:-192.168.0.0/16}
+  podSubnet: ${NETWORKING_POD_SUBNET:-10.0.0.0/16}
 nodeName: $(hostname)
 authorizationModes:
 $(echo "${AUTHORIZATION_MODES:-Node,RBAC}" | cut -d, -f1- --output-delimiter=$'\n' | sed 's/\(.*\)/- \1/g')
