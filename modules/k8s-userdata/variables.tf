@@ -172,3 +172,9 @@ variable "cacrt_sha256sum" {
   description = "Kubernetes cacrt sha256sum. (useful for worker nodes to join existing cluster)"
   default     = ""
 }
+
+variable "taints" {
+  type        = "list"
+  description = "A list of taints to apply to all nodes."
+  default     = []
+}

@@ -17,6 +17,7 @@ Environment=CLUSTER_DOMAIN=cluster.local
 Environment=AUTH_MODE=Webhook
 Environment=CLIENT_CA_FILE=/etc/kubernetes/pki/ca.crt
 Environment=VOLUME_PLUGIN_DIR=/var/lib/kubelet/volumeplugins
+Environment=TAINTS=
 
 EnvironmentFile=/etc/sysconfig/kubernetes.conf
 EnvironmentFile=-/var/run/instance.metadata.conf
@@ -46,6 +47,7 @@ ExecStart=/opt/k8s/bin/kubelet \
   --client-ca-file=${CLIENT_CA_FILE} \
   --volume-plugin-dir=${VOLUME_PLUGIN_DIR} \
   --node-labels=instance-type=${INSTANCE_TYPE},${INSTANCE_METADATA} \
+  --register-with-taints=${TAINTS} \
   --rotate-certificates=true
 
 Restart=always

@@ -49,6 +49,7 @@ UPSTREAM_RESOLVER=${var.upstream_resolver}
 NETWORKING_SERVICE_SUBNET=${var.service_cidr}
 NETWORKING_POD_SUBNET=${var.pod_cidr}
 API_SERVER_CERT_SANS=${join(",", concat(var.private_ipv4_addrs,var.public_ipv4_addrs))}
+TAINTS=${join(",", var.taints)}
 MASTER_MODE=${var.master_mode}
 WORKER_MODE=${var.worker_mode}
 KUBEPROXY_CONFIG_MODE=iptables

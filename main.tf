@@ -119,8 +119,8 @@ module "userdata" {
   api_endpoint    = "${var.api_endpoint}"
   bootstrap_token = "${var.bootstrap_token}"
   cacrt_sha256sum = "${var.cacrt_sha256sum}"
-
-  worker_mode = "${var.worker_mode}"
+  taints          = "${var.taints}"
+  worker_mode     = "${var.worker_mode}"
 }
 
 resource "openstack_compute_instance_v2" "multinet_k8s" {
