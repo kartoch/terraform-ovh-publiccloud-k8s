@@ -32,12 +32,6 @@ else
     CACRT_SHA256SUM="$CACRT_SHA256SUM"
 fi
 
-if [ -z "$API_ENDPOINT" ]; then
-    JOIN=$($ETCDCTL_COMMAND get --prefix "$MASTERS_ETCD_KEYPREFIX" --print-value-only --limit 1):6443
-else
-    JOIN="$API_ENDPOINT"
-fi
-
 if [ -z "$PKI" ] || [ -z "$TOKEN" ] || [ -z "$CACRT_SHA256SUM" ]; then
     master_keys=missing
 else
@@ -70,6 +64,18 @@ if [ "$master_keys" == "missing" ]; then
     cacrtsum=$(openssl x509 -in /etc/kubernetes/pki/ca.crt -noout -pubkey | openssl rsa -pubin -outform DER 2>/dev/null | sha256sum | cut -d' ' -f1)
     $ETCDCTL_COMMAND put "$CACRT_SHA256SUM_ETCD_KEY" "sha256:$cacrtsum"
 else
+    if [ -z "$API_ENDPOINT" ]; then
+        masterip=$($ETCDCTL_COMMAND get --prefix "$MASTERS_ETCD_KEYPREFIX" \
+                                          --print-value-only --limit 1)
+        if [ -z "$masterip" ]; then
+            echo "ERROR: no master ip registered and no API_ENDPOINT defined" >&2
+            exit 1
+        fi
+        JOIN="${masterip}:6443"
+    else
+        JOIN="$API_ENDPOINT"
+    fi
+
     echo "pki already in etcd. retrieving.." >&2
     mkdir -p /etc/kubernetes/pki
     (cd /etc/kubernetes/pki  && echo -e "$PKI" | base64 -d | tar -xf -)

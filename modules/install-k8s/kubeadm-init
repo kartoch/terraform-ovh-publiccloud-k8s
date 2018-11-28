@@ -57,8 +57,13 @@ if [ "$MASTER_MODE" == "1" ]; then
     echo "kubeadm init done, lock $INIT_ETCD_LOCK released" >&2
 else
     if [ -z "$API_ENDPOINT" ]; then
-        JOIN=$($ETCDCTL_COMMAND get --prefix "$MASTERS_ETCD_KEYPREFIX" \
-                                --print-value-only --limit 1):6443
+        masterip=$($ETCDCTL_COMMAND get --prefix "$MASTERS_ETCD_KEYPREFIX" \
+                                          --print-value-only --limit 1)
+        if [ -z "$masterip" ]; then
+            echo "ERROR: no master ip registered and no API_ENDPOINT defined" >&2
+            exit 1
+        fi
+        JOIN="${masterip}:6443"
     else
         JOIN="$API_ENDPOINT"
     fi

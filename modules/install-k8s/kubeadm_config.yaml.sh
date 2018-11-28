@@ -7,7 +7,16 @@ function pubipaddr(){
     fi
 }
 
-CONTROL_PLANE_ENDPOINT="${API_ENDPOINT:-$(pubipaddr):6443}"
+if [ -z "$API_ENDPOINT" ]; then
+    pubip="$(pubipaddr)"
+    if [ -z "$pubip" ]; then
+        echo "ERROR: cannot get pubip and no API_ENDPOINT defined" >&2
+        exit 1
+    fi
+    CONTROL_PLANE_ENDPOINT="${pubip}:6443"
+else
+    CONTROL_PLANE_ENDPOINT="$API_ENDPOINT"
+fi
 
 cat <<EOF
 apiVersion: kubeadm.k8s.io/v1alpha3
