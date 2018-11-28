@@ -87,7 +87,8 @@ function install_dependencies {
            socat \
            systemd-networkd \
            systemd-resolved \
-           ebtables
+           ebtables \
+           rng-tools
       sudo usermod -aG docker centos
   elif [ -n "$(command -v apt-get)" ] && [ -n "$(command -v ubuntu-bug)" ]; then
       log_info "Ubuntu based. upgrading system and installing docker"
@@ -98,7 +99,8 @@ function install_dependencies {
            jq \
            docker.io \
            socat \
-           ebtables
+           ebtables \
+           rng-tools
       sudo usermod -aG docker ubuntu
   elif [ -n "$(command -v coreos-install)" ]; then
       log_info "Nothing to do for coreos"

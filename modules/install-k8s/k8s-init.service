@@ -1,7 +1,7 @@
 [Unit]
 Description=Bootstrap a Kubernetes cluster with kubeadm
-Wants=etcd.service
-After=etcd.service
+Wants=etcd.service rngd.service rng-tools.service
+After=etcd.service rngd.service rng-tools.service
 ConditionPathExists=!/opt/k8s/init.done
 After=%AFTER%
 
