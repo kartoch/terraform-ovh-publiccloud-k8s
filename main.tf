@@ -186,7 +186,7 @@ module "post_install_cfssl" {
 
 module "post_install_etcd" {
   source  = "ovh/publiccloud-etcd/ovh//modules/install-etcd"
-  version = "0.1.7"
+  version = "0.1.8"
 
   count            = "${var.post_install_modules && var.etcd ? var.count : 0}"
   triggers         = ["${concat(openstack_compute_instance_v2.singlenet_k8s.*.id, openstack_compute_instance_v2.multinet_k8s.*.id)}"]
