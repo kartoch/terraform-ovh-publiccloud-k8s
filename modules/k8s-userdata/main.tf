@@ -42,7 +42,7 @@ data "template_file" "k8s_vars" {
   template = <<TPL
 ETCD_ENDPOINTS=${join(",", compact(list(var.etcd_endpoints, (var.etcd? module.etcd.etcd_endpoints: ""))))}
 API_ENDPOINT=${var.api_endpoint}
-CFSSL_ENDPOINT=${var.cfssl ? (var.cfssl_endpoint == "" ? module.cfssl.endpoint : var.cfssl_endpoint) : "" }
+CFSSL_ENDPOINT=${var.cfssl_endpoint == "" ? (var.cfssl ? module.cfssl.endpoint : "") : var.cfssl_endpoint}
 CLUSTER_DNS=${local.cluster_dns}
 CLUSTER_DOMAIN=${var.domain}
 UPSTREAM_RESOLVER=${var.upstream_resolver}
