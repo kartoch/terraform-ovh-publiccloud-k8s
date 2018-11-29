@@ -61,11 +61,11 @@ image_tag=${tag:-latest}
 image_name=""
 
 if [ "$TARGET" == "coreos" ]; then
-    image_name="CoreOS Stable K8s"
+    image_name="CoreOS Stable - OVH Kubernetes"
 elif [ "$TARGET" == "ubuntu1604" ]; then
-    image_name="Ubuntu 16.04 K8s"
+    image_name="Ubuntu 16.04 - OVH Kubernetes"
 elif [ "$TARGET" == "centos7" ]; then
-    image_name="Centos 7 K8s"
+    image_name="Centos 7 - OVH Kubernetes"
 else
     echo "checking if image already built" >&2
     exit 1
