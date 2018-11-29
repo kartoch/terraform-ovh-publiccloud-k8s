@@ -180,7 +180,7 @@ variable "associate_public_ipv4" {
 
 variable "associate_private_ipv4" {
   description = "Associate a private ipv4 with the k8s nodes"
-  default     = true
+  default     = false
 }
 
 variable "master_mode" {
