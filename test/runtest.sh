@@ -1,9 +1,10 @@
 #!/bin/bash
 
+TFTEST_CLEAN=${TFTEST_CLEAN:-1}
 DIR=${1:-$(dirname $0)/../examples/public-cluster-cl}
 REGION=${2:-$OS_REGION_NAME}
-DESTROY=${3:-1}
-CLEAN=${4:-1}
+DESTROY=${3:-$TFTEST_CLEAN}
+CLEAN=${4:-$TFTEST_CLEAN}
 TEST_NAME=${TF_VAR_name:-test}_$(basename "$DIR")
 TF_VAR_key_pair=${TF_VAR_key_pair:-test}
 TF_VAR_region=${REGION}
@@ -12,20 +13,20 @@ WITH_BASTION=0
 
 export TF_VAR_region
 
-test_tf(){
-    # timeout is not 120 seconds but 120 loops, each taking at least 1 sec
-    local timeout=120
-    local inc=0
-    local res=1
+function test_tf(){
+    end=$(date +%s)
+    if ! [ -z "$timeout" ]; then
+        end=$((end + $timeout))
+    else
+        end=$((end + 900))
+    fi
 
-    while [ "$res" -ne 0 ] && [ "$inc" -lt "$timeout" ]; do
-        (cd "${DIR}" && terraform output ${OUTPUT_TEST} | sh)
-        res=$?
-        sleep 1
-        ((inc++))
+    while true; do
+        (cd "${DIR}" && terraform output ${OUTPUT_TEST} | sh) && return 0 || true
+        sleep 5
+        now=$(date +%s)
+        [ $now -gt $end ] && echo command failed after "$timeout". wont wait any longer >&2 && return 1
     done
-
-    return $res
 }
 
 if grep -q bastion_public_ip "$DIR"/*.tf; then
@@ -36,10 +37,10 @@ fi
 
 cp "$(dirname $0)/test.tf" "$DIR"
 
-if [ -f "$(dirname $0)/test_counts_$(basename $DIR).tf" ]; then
-   cp "$(dirname $0)/test_counts_$(basename $DIR).tf" "$DIR"
+if [ -f "$(dirname $0)/test_$(basename $DIR).tf" ]; then
+   cp "$(dirname $0)/test_$(basename $DIR).tf" "$DIR"
 else
-   cp "$(dirname $0)/test_counts.tf" "$DIR"
+   cp "$(dirname $0)/test_defaults.tf" "$DIR"
 fi
 
 sed -i -e s,%%TESTNAME%%,$TEST_NAME,g "$DIR"/test*.tf
