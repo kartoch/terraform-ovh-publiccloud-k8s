@@ -1,0 +1,6 @@
+[Match]
+Name=eth0 ens3
+[Network]
+DHCP=ipv4
+[DHCP]
+RouteMetric=4096

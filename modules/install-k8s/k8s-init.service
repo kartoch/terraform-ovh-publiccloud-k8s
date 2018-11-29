@@ -1,12 +1,14 @@
 [Unit]
 Description=Bootstrap a Kubernetes cluster with kubeadm
-Wants=etcd.service
-After=etcd.service
+Wants=etcd.service rngd.service rng-tools.service
+After=etcd.service rngd.service rng-tools.service
 ConditionPathExists=!/opt/k8s/init.done
+After=%AFTER%
 
 [Service]  
 Restart=on-failure
 RestartSec=10s
+TimeoutStartSec=300s
 
 Environment=MASTER_MODE=0
 Environment=WORKER_MODE=0
@@ -22,27 +24,28 @@ Environment=CACRT_SHA256SUM_ETCD_KEY=k8s/cacrt-sha256
 Environment=BOOTSTRAP_TOKEN_ETCD_KEY=k8s/bootstrap-token
 Environment=PKI_ETCD_KEY=k8s/pki
 Environment=MASTERS_ETCD_KEYPREFIX=k8s/masters
-Environment=INIT_ETCD_LOCK=k8s/k8s-init-lock
+Environment=INIT_ETCD_LOCK=k8s/init-lock
+
+Environment=POD_MANIFEST_PATH=/etc/kubernetes/manifests
+Environment=CLUSTER_DOMAIN=cluster.local
+Environment=UPSTREAM_RESOLVER=213.186.33.99:53
+Environment=NETWORKING_SERVICE_SUBNET=192.168.0.0/16
+Environment=NETWORKING_POD_SUBNET=10.0.0.0/16
+Environment=API_SERVER_CERT_SANS=127.0.0.1
+Environment=KUBERNETES_VERSION=1.12.2
+Environment=KUBEPROXY_CONFIG_MODE=iptables
+Environment=AUTHORIZATION_MODES=Node,RBAC
+
+Environment=POSTSETUP_ETCD_LOCK=k8s/postsetup-lock
 Environment=K8S_ADMIN_SA_USERNAME=admin
 Environment=K8S_ADMIN_SA_USERNAME_ETCD_KEY=k8s/admin/sa-name
 Environment=K8S_ADMIN_SA_USER_TOKEN_ETCD_KEY=k8s/admin/user-token
 Environment=K8S_ADMIN_SA_ENDPOINT_ETCD_KEY=k8s/admin/endpoint
 Environment=K8S_ADMIN_SA_CLUSTER_NAME_ETCD_KEY=k8s/admin/cluster-name
-
-Environment=POD_MANIFEST_PATH=/etc/kubernetes/manifests
-Environment=CLUSTER_DOMAIN=cluster.local
-Environment=UPSTREAM_RESOLVER=213.186.33.99:53
-Environment=NETWORKING_SERVICE_SUBNET=10.3.0.0/16
-Environment=NETWORKING_POD_SUBNET=10.2.0.0/16
-Environment=API_SERVER_CERT_SANS=127.0.0.1
-Environment=KUBERNETES_VERSION=1.12.0
-Environment=KUBEPROXY_CONFIG_MODE=iptables
-Environment=AUTHORIZATION_MODES=Node,RBAC
+Environment=K8S_POSTSETUP_DONE_ETCD_KEY=k8s/postsetupdone
 
 EnvironmentFile=/etc/sysconfig/kubernetes.conf
 
-ExecStartPre=/opt/k8s/k8s-get-certs
-ExecStart=/opt/k8s/k8s-init
-
-[Install]
-WantedBy=multi-user.target
+ExecStartPre=/opt/k8s/bin/etcd-get-certs
+ExecStartPre=/bin/sh -c '/opt/k8s/bin/kubeadm-init && touch /opt/k8s/kubeadm-init.done'
+ExecStart=/bin/sh -c '/opt/k8s/bin/postsetup && touch /opt/k8s/init.done'

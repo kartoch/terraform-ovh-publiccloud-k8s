@@ -35,17 +35,17 @@ variable "ssh_bastion_user" {
 
 variable "k8s_version" {
   description = "The version of k8s to install with the post installation script if `post_install_module` is set to true"
-  default     = "1.12.0"
+  default     = "1.12.2"
 }
 
 variable "calico_node_version" {
   description = "The version of calico_node to install with the post installation script if `post_install_module` is set to true"
-  default     = "3.1.2"
+  default     = "3.3.1"
 }
 
 variable "calico_cni_version" {
   description = "The version of calico_cni to install with the post installation script if `post_install_module` is set to true"
-  default     = "3.1.2"
+  default     = "3.3.1"
 }
 
 variable "flannel_version" {
@@ -65,15 +65,15 @@ variable "k8s_sha1sum_cni_plugins" {
 
 variable "k8s_sha1sum_kubelet" {
   description = "The sha1 checksum of the k8s binary kubelet to install with the post installation script if `post_install_module` is set to true"
-  default     = "2948b9afd0e8e3181d18b83f87533afd6e5f4970"
+  default     = "a82ca0bb1c7d838ec83070f92ddda9671ee02f90"
 }
 
 variable "k8s_sha1sum_kubectl" {
   description = "The sha1 checksum of the k8s binary kubectl to install with the post installation script if `post_install_module` is set to true"
-  default     = "85904f6caa295eaeef10e1b59a5e9f823e7b4825"
+  default     = "8e94e8bafdcd919a183143d6f3364b75278e277d"
 }
 
 variable "k8s_sha1sum_kubeadm" {
   description = "The sha1 checksum of the k8s binary kubeadm to install with the post installation script if `post_install_module` is set to true"
-  default     = "ec4f55d51b72e481d29f9cf8bc96f6c441976a53"
+  default     = "8eb38063068f9f19a372333c0c03041ea1396e50"
 }

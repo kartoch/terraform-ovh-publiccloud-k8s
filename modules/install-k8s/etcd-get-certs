@@ -1,9 +1,6 @@
 #!/bin/bash
 # shellcheck source=/dev/null
-# This scripts gets all tls certs required for k8s. These can be external CA, etcd tls keypairs, ...
-# As by kubeadm 1.10.0, generating tls certs for k8s internals is not so relevant.
-# Externalizing a CA is useful when you don't want to share the private keys on all nodes. But
-# kubeadm requires at least the front proxy ca key and the service account private key on all nodes.
+# This scripts gets all tls certs required for etcd comm
 
 function get_etcd_ca(){
     # retrieve CA from cfssl server
@@ -59,9 +56,12 @@ if [ -z "$ETCD_KEY_FILE" ]; then
 fi
 
 # creating directories
-mkdir -p "$(dirname $ETCD_CA_FILE)" \
+if ! mkdir -p "$(dirname $ETCD_CA_FILE)" \
       "$(dirname $ETCD_CERT_FILE)"\
-      "$(dirname $ETCD_KEY_FILE)"
+      "$(dirname $ETCD_KEY_FILE)"; then
+    echo "unable to create ETCD certs dirs" >&2
+    exit 1
+fi
 
 if ! get_etcd_ca; then
     echo "unable to retrieve ca file from cfssl server" >&2

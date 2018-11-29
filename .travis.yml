@@ -15,7 +15,7 @@ addons:
       - python-dev
 env:
   global:
-  # don't run all tests or travis build is too long 
+  # don't run all tests or travis build is too long
   - TESTS=public-cluster-cl-prebuilt public-cluster-with-workers-cl
   - TERRAFORM_VERSION=0.11.7
   - PACKER_VERSION=1.2.2
@@ -34,6 +34,7 @@ before_install:
 - ./test/travis_setup.sh
 script:
 - export TF_VAR_name=TRAVIS_${TRAVIS_BUILD_NUMBER}
+- export TF_VAR_image_tag=""
 - export TF_VAR_remote_ip_prefix=0.0.0.0/0
 - test/runtests.sh $OS_REGION_NAME publish delete_existing_keypair
 branches:

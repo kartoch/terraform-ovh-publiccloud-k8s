@@ -15,7 +15,7 @@ variable "name" {
 
 variable "domain" {
   description = "The domain of the cluster."
-  default     = "local"
+  default     = "cluster.local"
 }
 
 variable "datacenter" {
@@ -28,8 +28,14 @@ variable "k8s_version" {
   default     = ""
 }
 
-variable "ipv4_addrs" {
-  description = "list of nodes ipv4 addrs. Required if `master_mode` is true."
+variable "public_ipv4_addrs" {
+  description = "list of nodes public ipv4 addrs. one of public or private is required if `master_mode` is true."
+  type        = "list"
+  default     = []
+}
+
+variable "private_ipv4_addrs" {
+  description = "list of nodes private ipv4 addrs. one of public or private is required if `master_mode` is true."
   type        = "list"
   default     = []
 }
@@ -89,7 +95,7 @@ variable "volume_plugin_dir" {
 variable "pod_cidr" {
   description = "CIDR IPv4 range to assign Kubernetes pods"
   type        = "string"
-  default     = "10.2.0.0/16"
+  default     = "10.0.0.0/16"
 }
 
 variable "service_cidr" {
@@ -99,7 +105,7 @@ The 1st IP will be reserved for kube_apiserver, the 10th IP will be reserved for
 EOD
 
   type    = "string"
-  default = "10.3.0.0/16"
+  default = "192.168.0.0/16"
 }
 
 variable "cacert" {
@@ -165,4 +171,10 @@ variable "bootstrap_token" {
 variable "cacrt_sha256sum" {
   description = "Kubernetes cacrt sha256sum. (useful for worker nodes to join existing cluster)"
   default     = ""
+}
+
+variable "taints" {
+  type        = "list"
+  description = "A list of taints to apply to all nodes."
+  default     = []
 }

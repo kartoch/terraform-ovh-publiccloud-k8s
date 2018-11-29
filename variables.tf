@@ -55,7 +55,8 @@ The flavor name that will be used for k8s nodes.
 kube-dns may fail if only one VCPU is present (see kubernetes/kubernetes#38806).
 It is not recommanded to use sandbox instances `s1-2` and `s1-4`.
 DESC
-  default     = "s1-8"
+
+  default = "s1-8"
 }
 
 variable "count" {
@@ -77,6 +78,12 @@ variable "create_secgroups" {
 variable "metadata" {
   description = "A map of metadata to add to all resources supporting it."
   default     = {}
+}
+
+variable "taints" {
+  type        = "list"
+  description = "A list of taints to apply to all nodes."
+  default     = []
 }
 
 variable "subnet_ids" {
@@ -143,7 +150,7 @@ EOD
 
 variable "upstream_resolver" {
   description = "coredns upstream dns resolver. can take either a file path such as /etc/resolv.conf or a dns nameserver in the form `213.186.33.99:53`"
-  default = "213.186.33.99:53"
+  default     = "213.186.33.99:53"
 }
 
 variable "post_install_modules" {
@@ -173,7 +180,7 @@ variable "associate_public_ipv4" {
 
 variable "associate_private_ipv4" {
   description = "Associate a private ipv4 with the k8s nodes"
-  default     = true
+  default     = false
 }
 
 variable "master_mode" {

@@ -1,6 +1,5 @@
 locals {
-  eth_route_tpl      = "%s dev %s scope link metric 0"
-  networkd_route_tpl = "[Route]\nDestination=%s\nGatewayOnLink=yes\nRouteMetric=3\nScope=link\nProtocol=kernel"
+  networkd_route_tpl = "[Route]\nDestination=%s\nGatewayOnlink=yes\nMetric=2048\nScope=link"
 }
 
 data "template_file" "cfssl_ca_files" {
@@ -24,10 +23,10 @@ data "template_file" "systemd_network_files" {
   permissions: '0644'
   content: |
     [Match]
-    Name=eth0
+    Name=ens3 eth0
     [Network]
     DHCP=ipv4
-    ${indent(4, format(local.networkd_route_tpl, var.host_cidr))}
+    ${var.host_cidr != "" ? indent(4, format(local.networkd_route_tpl, var.host_cidr)) : ""}
     [DHCP]
     RouteMetric=2048
     UseDNS=no
@@ -35,11 +34,11 @@ data "template_file" "systemd_network_files" {
   permissions: '0644'
   content: |
     [Match]
-    Name=eth1
+    Name=ens4 eth0
     [Network]
     DHCP=ipv4
     [DHCP]
-    RouteMetric=2048
+    RouteMetric=1024
     UseDNS=no
 TPL
 }
@@ -120,8 +119,10 @@ write_files:
   ${indent(2, data.template_file.kubernetes_conf.rendered)}
   ${indent(2, data.template_file.systemd_network_files.rendered)}
   ${indent(2, data.template_file.systemd_resolved_file.rendered)}
-  - path: /etc/sysconfig/network-scripts/route-eth0
-    content: |
-      ${indent(6, format(local.eth_route_tpl, var.host_cidr, "eth0"))}
+
+# ensures networking config & k8s-init is taken into account at first boot
+# once files are written
+runcmd:
+  - systemctl reload-or-restart systemd-networkd systemd-resolved
 CLOUDCONFIG
 }

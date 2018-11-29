@@ -1,5 +1,6 @@
 #!/bin/bash
-# This script can be used to install Kubernetes and its dependencies. This script has been tested with the CentOS 7 operating system.
+# This script can be used to install Kubernetes binaries and its dependencies.
+# This script has been tested with the CentOS 7/CoreOS/Ubuntu operating systems.
 set -e
 
 readonly DEFAULT_INSTALL_PATH="/opt/k8s"
@@ -7,19 +8,19 @@ readonly DEFAULT_INSTALL_PATH="/opt/k8s"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_NAME="$(basename "$0")"
 
-readonly DEFAULT_K8S_VERSION="1.12.0"
-readonly DEFAULT_CALICO_NODE_VERSION="3.1.2"
-readonly DEFAULT_CALICO_CNI_VERSION="3.1.2"
+readonly DEFAULT_K8S_VERSION="1.12.2"
+readonly DEFAULT_CALICO_NODE_VERSION="3.3.1"
+readonly DEFAULT_CALICO_CNI_VERSION="3.3.1"
 readonly DEFAULT_FLANNEL_VERSION="0.9.1"
 readonly DEFAULT_ETCD_VERSION="3.3.9"
-readonly DEFAULT_CRICTL_VERSION="1.11.1"
+readonly DEFAULT_CRICTL_VERSION="1.12.0"
 readonly DEFAULT_K8S_CNI_PLUGINS_VERSION="0.7.1"
 readonly DEFAULT_K8S_SHA1SUM_CNI_PLUGINS="fb29e20401d3e9598a1d8e8d7992970a36de5e05"
-readonly DEFAULT_K8S_SHA1SUM_KUBELET="2948b9afd0e8e3181d18b83f87533afd6e5f4970"
-readonly DEFAULT_K8S_SHA1SUM_KUBECTL="85904f6caa295eaeef10e1b59a5e9f823e7b4825"
-readonly DEFAULT_K8S_SHA1SUM_KUBEADM="ec4f55d51b72e481d29f9cf8bc96f6c441976a53"
+readonly DEFAULT_K8S_SHA1SUM_KUBELET="a82ca0bb1c7d838ec83070f92ddda9671ee02f90"
+readonly DEFAULT_K8S_SHA1SUM_KUBECTL="8e94e8bafdcd919a183143d6f3364b75278e277d"
+readonly DEFAULT_K8S_SHA1SUM_KUBEADM="8eb38063068f9f19a372333c0c03041ea1396e50"
 readonly DEFAULT_SHA256SUM_ETCD="7b95bdc6dfd1d805f650ea8f886fdae6e7322f886a8e9d1b0d14603767d053b1"
-readonly DEFAULT_SHA1SUM_CRICTL="767cb6e6ab5a9202d851950743a500a09d08faf5"
+readonly DEFAULT_SHA1SUM_CRICTL="45a9c65cc52a13e76e07fbc64ddcf3b646cd8c82"
 
 function print_usage {
   echo
@@ -81,14 +82,25 @@ function install_dependencies {
   if [ -n "$(command -v yum)" ]; then
       # curl to download or interact with apis,
       # docker to run kubernetes infra # Not tested
-      sudo yum install -y docker socat systemd-networkd systemd-resolved
+      sudo yum install -y \
+           docker \
+           socat \
+           systemd-networkd \
+           systemd-resolved \
+           ebtables \
+           rng-tools
       sudo usermod -aG docker centos
   elif [ -n "$(command -v apt-get)" ] && [ -n "$(command -v ubuntu-bug)" ]; then
       log_info "Ubuntu based. upgrading system and installing docker"
       echo "Debian based. upgrading system." >&2
       export DEBIAN_FRONTEND=noninteractive
       sudo -E apt update -y -q
-      sudo -E apt install --no-install-recommends -q -y jq docker.io socat
+      sudo -E apt install --no-install-recommends -q -y \
+           jq \
+           docker.io \
+           socat \
+           ebtables \
+           rng-tools
       sudo usermod -aG docker ubuntu
   elif [ -n "$(command -v coreos-install)" ]; then
       log_info "Nothing to do for coreos"
@@ -105,13 +117,21 @@ function create_k8s_install_paths {
   sudo mkdir -p "$path/bin"
   sudo echo "export PATH=\$PATH:$path/bin"  | sudo tee /etc/profile.d/k8s_path.sh > /dev/null
   sudo chmod +x /etc/profile.d/k8s_path.sh
-  sudo cp $SCRIPT_DIR/{k8s-init,k8s-get-certs,kubeadm-init,kubeadm_config.yaml.sh,cni-manifest.yaml.sh,coredns-manifest.yaml.sh} "$path"
-  sudo chmod +x "$path"/{k8s-init,k8s-get-certs,kubeadm-init,kubeadm_config.yaml.sh,cni-manifest.yaml.sh,coredns-manifest.yaml.sh}
+  for i in kubeadm-init \
+               kubeadm-init-lock \
+               postsetup \
+               postsetup-lock \
+               etcd-get-certs \
+               kubeadm_config.yaml.sh \
+               cni-manifest.yaml.sh; do
+      sudo cp "$SCRIPT_DIR/${i}" "$path/bin"
+      sudo chmod +x "$path/bin/${i}"
+  done
 }
 
 function check_sha1sum {
   local readonly path="$1"
-  local readonly sha1sum="$2"
+  local readonly "sha1sum"="$2"
   local readonly computed_sha1sum=$(sha1sum "$path" | awk '{print $1}')
 
   if [ "$sha1sum" != "$computed_sha1sum" ]; then
@@ -220,24 +240,35 @@ function setup_systemd {
     local readonly username="$1"
     sudo cp "$SCRIPT_DIR/kubelet.service" "/etc/systemd/system/"
     sudo cp "$SCRIPT_DIR/k8s-init.service" "/etc/systemd/system/"
-    sudo cp "$SCRIPT_DIR/k8s-init.path" "/etc/systemd/system/"
+    sudo cp "$SCRIPT_DIR/10-eth0.network" "/etc/systemd/network/"
 
-    if [ -n "$(command -v yum)" ]; then
-        # setup systemd networking
-        sudo systemctl disable network
-        sudo systemctl disable NetworkManager
-        sudo systemctl start systemd-resolved
-        sudo rm -f /etc/resolv.conf
-        sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
-    elif [ -n "$(command -v apt-get)" ] && [ -n "$(command -v ubuntu-bug)" ]; then
-        # setup systemd networking
+    if systemctl list-unit-files --all | grep -q networking.service; then
         sudo systemctl disable networking
-        sudo systemctl start systemd-resolved
-        sudo rm -f /etc/resolv.conf
-        sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+        sudo systemctl mask networking ifup@ens3.service ifup@eth0.service
     fi
 
-    sudo systemctl enable kubelet.service k8s-init.path docker.service systemd-resolved systemd-networkd
+    if systemctl list-unit-files --all | grep -q network.service; then
+        sudo systemctl disable network NetworkManager
+        sudo systemctl mask network NetworkManager
+    fi
+
+    sudo systemctl start systemd-resolved
+    sudo rm -f /etc/resolv.conf
+    sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+
+    sudo systemctl enable docker.service systemd-resolved systemd-networkd
+
+    if [ -n "$(command -v apt-get)" ] && [ -n "$(command -v ubuntu-bug)" ]; then
+        sudo sed -i -e s/%AFTER%/cloud-init.target/g "/etc/systemd/system/k8s-init.service"
+        sudo sed -i -e s/%WANTS%/cloud-init.target/g "/etc/systemd/system/kubelet.service"
+        sudo systemctl add-wants cloud-init.target k8s-init.service
+    else
+        sudo sed -i -e s/%AFTER%/multi-user.target/g "/etc/systemd/system/k8s-init.service"
+        sudo sed -i -e s/%WANTS%/cloud-init.target/g "/etc/systemd/system/kubelet.service"
+        sudo systemctl add-wants multi-user.target k8s-init.service
+    fi
+
+    sudo systemctl enable kubelet.service
 
     # disable firewalld. TODO: make a proper setup for etcd
     if systemctl list-unit-files --all | grep -q firewalld.service; then

@@ -107,23 +107,20 @@ module "userdata" {
   etcd_initial_cluster = "${var.etcd_initial_cluster}"
   etcd_endpoints       = "${var.etcd_endpoints}"
   upstream_resolver    = "${var.upstream_resolver}"
-
-  # if private ipv4 addrs are set, prefer them over public addrs;
-  # they will notably be used to set etcd_initial_cluster attr.
-  ipv4_addrs = ["${coalescelist(flatten(openstack_networking_port_v2.port_k8s.*.all_fixed_ips), data.template_file.public_ipv4_addrs.*.rendered)}"]
-
-  ssh_authorized_keys = ["${var.ssh_authorized_keys}"]
-  cfssl_key_algo      = "${var.cfssl_key_algo}"
-  cfssl_key_size      = "${var.cfssl_key_size}"
-  cfssl_bind          = "${var.cfssl_bind}"
-  cfssl_port          = "${var.cfssl_port}"
+  private_ipv4_addrs   = ["${flatten(openstack_networking_port_v2.port_k8s.*.all_fixed_ips)}"]
+  public_ipv4_addrs    = ["${data.template_file.public_ipv4_addrs.*.rendered}"]
+  ssh_authorized_keys  = ["${var.ssh_authorized_keys}"]
+  cfssl_key_algo       = "${var.cfssl_key_algo}"
+  cfssl_key_size       = "${var.cfssl_key_size}"
+  cfssl_bind           = "${var.cfssl_bind}"
+  cfssl_port           = "${var.cfssl_port}"
 
   # k8s variables to join existing cluster
   api_endpoint    = "${var.api_endpoint}"
   bootstrap_token = "${var.bootstrap_token}"
   cacrt_sha256sum = "${var.cacrt_sha256sum}"
-
-  worker_mode = "${var.worker_mode}"
+  taints          = "${var.taints}"
+  worker_mode     = "${var.worker_mode}"
 }
 
 resource "openstack_compute_instance_v2" "multinet_k8s" {
@@ -177,7 +174,7 @@ resource "openstack_compute_instance_v2" "singlenet_k8s" {
 
 module "post_install_cfssl" {
   source  = "ovh/publiccloud-cfssl/ovh//modules/install-cfssl"
-  version = ">= 0.1.10"
+  version = ">= 0.1.13"
 
   count            = "${var.post_install_modules && var.cfssl && var.count >= 1 ? 1 : 0}"
   triggers         = ["${element(concat(openstack_compute_instance_v2.singlenet_k8s.*.id, openstack_compute_instance_v2.multinet_k8s.*.id), 0)}"]
@@ -189,7 +186,7 @@ module "post_install_cfssl" {
 
 module "post_install_etcd" {
   source  = "ovh/publiccloud-etcd/ovh//modules/install-etcd"
-  version = "0.1.5"
+  version = "0.1.9"
 
   count            = "${var.post_install_modules && var.etcd ? var.count : 0}"
   triggers         = ["${concat(openstack_compute_instance_v2.singlenet_k8s.*.id, openstack_compute_instance_v2.multinet_k8s.*.id)}"]
