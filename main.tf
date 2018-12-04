@@ -121,6 +121,8 @@ module "userdata" {
   cacrt_sha256sum = "${var.cacrt_sha256sum}"
   taints          = "${var.taints}"
   worker_mode     = "${var.worker_mode}"
+
+  additional_write_files = ["${var.additional_write_files}"]
 }
 
 resource "openstack_compute_instance_v2" "multinet_k8s" {

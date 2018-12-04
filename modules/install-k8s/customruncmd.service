@@ -1,0 +1,11 @@
+[Unit]
+Description=Add Custom runcmd at boot
+After=%AFTER%
+Before=k8s-init.service kubelet.service
+
+[Service]  
+Type=oneshot
+RemainAfterExit=yes
+
+ExecStartPre=/bin/sh -c 'systemctl daemon-reload'
+ExecStart=/bin/sh -c 'echo ok'
