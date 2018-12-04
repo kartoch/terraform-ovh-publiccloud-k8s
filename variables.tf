@@ -304,3 +304,9 @@ variable "cacrt_sha256sum" {
   description = "Kubernetes cacrt sha256sum. (useful for worker nodes to join existing cluster)"
   default     = ""
 }
+
+variable "additional_write_files" {
+  type        = "list"
+  description = "A list of additional cloud init write_files"
+  default     = []
+}

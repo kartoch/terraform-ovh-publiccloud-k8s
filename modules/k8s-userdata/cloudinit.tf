@@ -119,6 +119,7 @@ write_files:
   ${indent(2, data.template_file.kubernetes_conf.rendered)}
   ${indent(2, data.template_file.systemd_network_files.rendered)}
   ${indent(2, data.template_file.systemd_resolved_file.rendered)}
+  ${indent(2, join("\n", var.additional_write_files))}
 
 # ensures networking config & k8s-init is taken into account at first boot
 # once files are written

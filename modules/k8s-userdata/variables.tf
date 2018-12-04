@@ -62,7 +62,7 @@ variable "etcd_endpoints" {
 
 variable "upstream_resolver" {
   description = "coredns upstream dns resolver. can take either a file path such as /etc/resolv.conf or a dns nameserver in the form `213.186.33.99:53`"
-  default = "213.186.33.99:53"
+  default     = "213.186.33.99:53"
 }
 
 variable "master_mode" {
@@ -176,5 +176,11 @@ variable "cacrt_sha256sum" {
 variable "taints" {
   type        = "list"
   description = "A list of taints to apply to all nodes."
+  default     = []
+}
+
+variable "additional_write_files" {
+  type        = "list"
+  description = "A list of additional cloud init write_files"
   default     = []
 }
