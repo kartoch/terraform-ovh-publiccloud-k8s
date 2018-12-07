@@ -88,14 +88,14 @@ You have to choose an openstack region to launch the cluster in, and a keypair n
 Using an openstack keypair:
 
 ```bash
-$ terraform apply -var region=GRA3 -var key_pair=k8s
+$ terraform apply -var os_region_name=GRA5 -var key_pair=k8s
 [...]
 ```
 
 Or using an ssh public key:
 
 ```bash
-$ terraform apply -var region=GRA3 -var public_sshkey=./ssh_key.pub
+$ terraform apply -var os_region_name=GRA5 -var public_sshkey=./ssh_key.pub
 [...]
 ```
 

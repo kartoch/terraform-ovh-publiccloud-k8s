@@ -1,5 +1,25 @@
-variable "region" {
+variable "os_region_name" {
   description = "The Openstack region name"
+}
+
+variable "os_auth_url" {
+  description = "The Openstack authentication url"
+}
+
+variable "os_username" {
+  description = "The Openstack username"
+}
+
+variable "os_password" {
+  description = "The Openstack password"
+}
+
+variable "os_tenant_id" {
+  description = "The Openstack tenant ID"
+}
+
+variable "os_tenant_name" {
+  description = "The Openstack tenant name"
 }
 
 variable "flavor_name" {

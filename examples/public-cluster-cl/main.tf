@@ -1,6 +1,6 @@
 provider "openstack" {
   version   = "~> 1.5.0"
-  region    = "${var.region}"
+  region    = "${var.os_region_name}"
 }
 
 data "http" "myip" {
@@ -10,7 +10,7 @@ data "http" "myip" {
 
 module "k8s" {
   source                 = "../.."
-  region                 = "${var.region}"
+  region                 = "${var.os_region_name}"
   name                   = "${var.name}"
   count                  = "${var.count}"
   master_mode            = true
