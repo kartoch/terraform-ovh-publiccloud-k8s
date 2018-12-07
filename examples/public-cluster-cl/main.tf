@@ -16,7 +16,6 @@ module "k8s" {
   os_username            = "${var.os_username}"
   os_password            = "${var.os_password}"
   os_tenant_id           = "${var.os_tenant_id}"
-  os_tenant_name         = "${var.os_tenant_name}"
   name                   = "${var.name}"
   count                  = "${var.count}"
   master_mode            = true

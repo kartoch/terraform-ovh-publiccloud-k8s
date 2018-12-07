@@ -102,6 +102,19 @@ ${data.template_file.cfssl_conf.rendered}
 TPL
 }
 
+data "template_file" "clound_conf_file" {
+  template = <<TPL
+- path: /etc/kubernetes/cloud.conf
+  permissions: '0600'
+  content: |
+    [Global]
+    username=${var.os_username}
+    password=${var.os_password}
+    auth-url=${var.os_auth_url}
+    tenant-id=${var.os_tenant_id}
+TPL
+}
+
 # Render a multi-part cloudinit config making use of the part
 # above, and other source files
 data "template_file" "config" {
@@ -119,6 +132,7 @@ write_files:
   ${indent(2, data.template_file.kubernetes_conf.rendered)}
   ${indent(2, data.template_file.systemd_network_files.rendered)}
   ${indent(2, data.template_file.systemd_resolved_file.rendered)}
+  ${var.master_mode && var.os_mode ? indent(2, data.template_file.cloud_conf_file.rendered) : ""}  
   ${indent(2, join("\n", var.additional_write_files))}
 
 # ensures networking config & k8s-init is taken into account at first boot

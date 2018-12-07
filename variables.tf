@@ -28,11 +28,6 @@ variable "os_tenant_id" {
   default     = ""  
 }
 
-variable "os_tenant_name" {
-  description = "The Openstack tenant name"
-  default     = ""  
-}
-
 variable "name" {
   type        = "string"
   description = "Cluster name"
