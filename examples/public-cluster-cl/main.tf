@@ -10,7 +10,13 @@ data "http" "myip" {
 
 module "k8s" {
   source                 = "../.."
-  region                 = "${var.os_region_name}"
+  os_mode                = "${var.os_mode}"
+  os_region_name         = "${var.os_region_name}"
+  os_auth_url            = "${var.os_auth_url}"
+  os_username            = "${var.os_username}"
+  os_password            = "${var.os_password}"
+  os_tenant_id           = "${var.os_tenant_id}"
+  os_tenant_name         = "${var.os_tenant_name}"
   name                   = "${var.name}"
   count                  = "${var.count}"
   master_mode            = true
