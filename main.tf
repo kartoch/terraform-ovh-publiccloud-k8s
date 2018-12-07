@@ -95,7 +95,7 @@ module "userdata" {
   name                 = "${var.name}"
   domain               = "${var.domain}"
   datacenter           = "${var.datacenter}"
-  region               = "${var.region}"
+  region               = "${var.os_region_name}"
   host_cidr            = "${var.host_cidr}"
   service_cidr         = "${var.service_cidr}"
   pod_cidr             = "${var.pod_cidr}"
@@ -233,6 +233,6 @@ data "template_file" "public_ipv4_dns" {
     ip2    = "${element(split(".", element(data.template_file.public_ipv4_addrs.*.rendered, count.index)), 1)}"
     ip3    = "${element(split(".", element(data.template_file.public_ipv4_addrs.*.rendered, count.index)), 2)}"
     ip4    = "${element(split(".", element(data.template_file.public_ipv4_addrs.*.rendered, count.index)), 3)}"
-    domain = "${lookup(var.ip_dns_domains, var.region, var.default_ip_dns_domains)}"
+    domain = "${lookup(var.ip_dns_domains, var.os_region_name, var.default_ip_dns_domains)}"
   }
 }

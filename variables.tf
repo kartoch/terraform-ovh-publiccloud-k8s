@@ -1,6 +1,36 @@
-variable "region" {
-  type        = "string"
-  description = "The target openstack region"
+variable "os_mode" {
+  description = "Enable Openstack mode"
+  default     = false
+}
+
+variable "os_region_name" {
+  description = "The Openstack region name"
+  default     = ""
+}
+
+variable "os_auth_url" {
+  description = "The Openstack authentication url"
+  default     = ""  
+}
+
+variable "os_username" {
+  description = "The Openstack username"
+  default     = ""  
+}
+
+variable "os_password" {
+  description = "The Openstack password"
+  default     = ""  
+}
+
+variable "os_tenant_id" {
+  description = "The Openstack tenant ID"
+  default     = ""  
+}
+
+variable "os_tenant_name" {
+  description = "The Openstack tenant name"
+  default     = ""  
 }
 
 variable "name" {
@@ -195,6 +225,7 @@ variable "ip_dns_domains" {
     GRA1 = "eu"
     SBG3 = "eu"
     GRA3 = "eu"
+    GRA5 = "eu"
     SBG3 = "eu"
     BHS3 = "net"
     WAW1 = "eu"
